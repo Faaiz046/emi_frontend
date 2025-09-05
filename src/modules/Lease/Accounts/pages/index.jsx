@@ -200,23 +200,36 @@ const AccountsListPage = () => {
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/20 to-white/5 rounded-full -translate-y-12 translate-x-12 blur-sm"></div>
               <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-white/15 to-white/5 rounded-full translate-y-8 -translate-x-8 blur-sm"></div>
               <div className="absolute top-1/2 left-1/4 w-12 h-12 bg-white/10 rounded-full blur-md animate-pulse"></div>
-              
+
               {/* Subtle pattern overlay */}
               <div className="absolute inset-0 opacity-30">
-                <div className="w-full h-full" style={{
-                  backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px)`,
-                  backgroundSize: '60px 60px'
-                }}></div>
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px)`,
+                    backgroundSize: "60px 60px",
+                  }}
+                ></div>
               </div>
-              
+
               <div className="relative z-10">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     {/* Main header content */}
                     <div className="flex items-center gap-3 mb-2">
                       <div className="p-2 bg-gradient-to-br from-white/25 to-white/15 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
                         </svg>
                       </div>
                       <div>
@@ -225,7 +238,9 @@ const AccountsListPage = () => {
                             #{selectedAccount.acc_no || "N/A"}
                           </h2>
                           <div className="px-2 py-0.5 bg-green-500/20 border border-green-400/30 rounded-full">
-                            <span className="text-green-300 text-xs font-semibold uppercase tracking-wider">Active</span>
+                            <span className="text-green-300 text-xs font-semibold uppercase tracking-wider">
+                              Active
+                            </span>
                           </div>
                         </div>
                         <p className="text-blue-100 text-base font-medium">
@@ -233,7 +248,7 @@ const AccountsListPage = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {/* Enhanced badges */}
                     <div className="flex items-center gap-2 mt-3">
                       <div className="px-3 py-1.5 bg-gradient-to-r from-white/25 to-white/15 rounded-lg border border-white/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -253,14 +268,16 @@ const AccountsListPage = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Enhanced Action Buttons */}
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-2">
                       <Button
                         onClick={() =>
                           navigate(
-                            `/lease/accounts/${selectedAccount.id || selectedAccount.acc_no}/installments`
+                            `/lease/accounts/${
+                              selectedAccount.id || selectedAccount.acc_no
+                            }/installments`
                           )
                         }
                         className="bg-gradient-to-r from-green-500 to-emerald-600 !text-white hover:from-emerald-600 hover:to-green-500 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 font-semibold px-3 py-2 rounded-lg text-sm"
@@ -306,11 +323,18 @@ const AccountsListPage = () => {
                         Edit Account
                       </Button>
                     </div>
-                    
+
                     {/* Quick stats */}
                     <div className="text-right">
-                      <div className="text-xs text-blue-200 uppercase tracking-wider mb-0.5">Account Status</div>
-                      <div className="text-xs text-white font-medium">Created: {selectedAccount.process_date ? getFormattedDate(selectedAccount.process_date) : "N/A"}</div>
+                      <div className="text-xs text-blue-200 uppercase tracking-wider mb-0.5">
+                        Account Status
+                      </div>
+                      <div className="text-xs text-white font-medium">
+                        Created:{" "}
+                        {selectedAccount.process_date
+                          ? getFormattedDate(selectedAccount.process_date)
+                          : "N/A"}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -511,7 +535,9 @@ const AccountsListPage = () => {
                       </label>
                       <p className="text-rose-900 text-base font-medium mt-1">
                         {selectedAccount?.leaseAdvance?.pending_advance
-                          ? formatCurrency(selectedAccount.leaseAdvance.pending_advance)
+                          ? formatCurrency(
+                              selectedAccount.leaseAdvance.pending_advance
+                            )
                           : "N/A"}
                       </p>
                     </div>

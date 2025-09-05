@@ -208,7 +208,7 @@ const AccountsPage = () => {
   const loadAccountData = async (id) => {
     try {
       setLoading(true);
-      const res = await leaseAccountApi.getById({id});
+      const res = await leaseAccountApi.getById({ id });
       const accountData = res?.data || res;
 
       if (accountData) {
@@ -364,7 +364,11 @@ const AccountsPage = () => {
 
     setFormData((prev) => {
       const newData = { ...prev, [name]: value };
-
+      if (name === "date") {
+        newData.process_date = new Date(value).toISOString();
+        newData.cust_date = new Date(value).toISOString();
+        newData.account_date = new Date(value).toISOString();
+      }
       // Auto-calculate remaining balance when installment_price or advance changes
       if (name === "installment_price" || name === "advance") {
         const installmentPrice =

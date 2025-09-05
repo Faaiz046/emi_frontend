@@ -1,6 +1,6 @@
 import { apiClient } from "../../../../services/api-client/api";
 
-const BASE_URL = "/installments";
+const BASE_URL = "/lease_installments";
 
 export const installmentApi = {
   // Get all installments with pagination and filters
@@ -17,7 +17,9 @@ export const installmentApi = {
 
   // Get installments by account ID
   getByAccountId: async (accountId, params = {}) => {
-    const response = await apiClient.get(`${BASE_URL}/account/${accountId}`, { params });
+    const response = await apiClient.get(`${BASE_URL}/account/${accountId}`, {
+      params,
+    });
     return response.data;
   },
 
