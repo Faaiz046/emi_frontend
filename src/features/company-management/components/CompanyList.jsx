@@ -76,7 +76,7 @@ const CompanyList = () => {
         result = await dispatch(
           updateCompany({ id: editingCompany.id, data: formData })
         ).unwrap();
-        if (result && result.status === true) {
+        if (result) {
           Toast.success("Company updated successfully");
           setShowModal(false);
           setEditingCompany(null);
@@ -86,6 +86,7 @@ const CompanyList = () => {
         }
       } else {
         result = await dispatch(createCompany(formData)).unwrap();
+        console.log("🚀 ~ handleSubmit ~ result:", result);
         if (result && result.status === true) {
           Toast.success("Company created successfully");
           setShowModal(false);
@@ -98,7 +99,7 @@ const CompanyList = () => {
       console.log("🚀 ~ handleSubmit ~ result:", result);
     } catch (error) {
       console.error("Error saving company:", error);
-      Toast.error("Failed to save company");
+      Toast.error(error || "Failed to save company");
     }
   };
 
@@ -305,6 +306,8 @@ const CompanyList = () => {
           resetForm();
         }}
         size="xl"
+        loading={loading}
+        onSubmit={handleSubmit}
       >
         <ModalHeader>
           <ModalTitle>
@@ -526,7 +529,7 @@ const CompanyList = () => {
             </div>
           </form>
         </ModalContent>
-        <ModalFooter>
+        {/* <ModalFooter>
           <Button
             type="button"
             variant="outline"
@@ -547,7 +550,7 @@ const CompanyList = () => {
               ? "Update Company"
               : "Create Company"}
           </Button>
-        </ModalFooter>
+        </ModalFooter> */}
       </Modal>
     </div>
   );

@@ -148,6 +148,7 @@ const UserList = () => {
           }));
           Toast.success('User created successfully');
         }
+          
       }
       
       setShowModal(false);
@@ -155,7 +156,7 @@ const UserList = () => {
       resetForm();
     } catch (error) {
       console.error('Error saving user:', error);
-      Toast.error('Failed to save user');
+      Toast.error(error.message || 'Failed to save user');
     } finally {
       setLoading(false);
     }

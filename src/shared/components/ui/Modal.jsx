@@ -152,8 +152,13 @@ const Modal = React.forwardRef(
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={loading} onClick={onSubmit}>
-                  {loading ? "Saving..." : "Submit"}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  onClick={onSubmit}
+                  loading={loading}
+                >
+                  {"Submit"}
                 </Button>
               </div>
             </ModalFooter>

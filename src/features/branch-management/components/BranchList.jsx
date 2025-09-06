@@ -108,7 +108,7 @@ const BranchList = () => {
       resetForm();
     } catch (error) {
       console.error("Error saving branch:", error);
-      Toast.error("Failed to save branch");
+      Toast.error(error.message || "Failed to save branch");
     } finally {
       setLoading(false);
     }

@@ -133,7 +133,7 @@ const authSlice = createSlice({
     // Logout
     builder
       .addCase(logoutUser.pending, (state) => {
-        state.isLoading = true;
+        state.isLoading = false;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.isLoading = false;

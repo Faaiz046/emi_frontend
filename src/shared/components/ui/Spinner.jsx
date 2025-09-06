@@ -1,7 +1,6 @@
 import React from "react";
 import { cva } from "class-variance-authority";
 import { useDynamicColors } from "../../../hooks/useDynamicColors";
-
 const spinnerVariants = cva("animate-spin rounded-full", {
   variants: {
     size: {

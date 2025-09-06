@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './Table';
 import { Button } from './Button';
 import { Spinner } from './Spinner';
-
+import PageLoader from './PageLoader';
 // Pagination component
 const Pagination = ({ pagination, onPageChange }) => {
   if (!pagination || !onPageChange) return null;
@@ -91,12 +91,13 @@ const DataTable = ({
   // Show loading state
   if (loading) {
     return (
-      <Spinner 
-        variant="primary" 
-        text={loadingMessage} 
-        layout="simple"
-        className={className} 
-      />
+      // <Spinner 
+      //   variant="primary" 
+      //   text={loadingMessage} 
+      //   layout="simple"
+      //   className={className} 
+      // />
+      <PageLoader height='h-[50vh]'/>
     );
   }
 

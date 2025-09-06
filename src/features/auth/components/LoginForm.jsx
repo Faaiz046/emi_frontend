@@ -77,7 +77,7 @@ const LoginForm = () => {
 
     try {
       const result = await dispatch(loginUser(formData)).unwrap();
-      
+      window.location.href = '/';
       // Show success toast
       dispatch(addToast({
         type: 'success',

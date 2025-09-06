@@ -6,6 +6,7 @@ import { Badge } from "../../../../shared/components/ui/Badge";
 import { Spinner } from "../../../../shared/components/ui/Spinner";
 import Toast from "../../../../utils/toast";
 import { outstandApi } from "../../services/outstand";
+import { getFormattedDate } from "../../../../utils/common";
 
 const OutstandPage = () => {
   const [data, setData] = useState([]);
@@ -88,8 +89,8 @@ const OutstandPage = () => {
     },
     {
       label: "Customer Name",
-      dataIndex: "customer_name",
-      key: "customer_name",
+      dataIndex: "customer",
+      key: "customer",
       render: (text) => <span className="font-medium">{text}</span>,
     },
     {
@@ -99,9 +100,32 @@ const OutstandPage = () => {
       render: (text) => <span className="text-gray-600">{text}</span>,
     },
     {
+      label: "Branch",
+      dataIndex: "branch",
+      key: "branch",
+      render: (text) => <span className="text-gray-700">{text.branch_name}</span>,
+    },
+    {
       label: "Product",
       dataIndex: "product_name",
       key: "product_name",
+      render: (text) => <span className="text-gray-700">{text}</span>,
+    },
+    {
+      label: "Paid Amount",
+      dataIndex: "paid_amount",
+      key: "paid_amount",
+      render: (amount) => (
+        <span className="font-semibold text-green-600">
+          ${parseFloat(amount).toLocaleString()}
+        </span>
+      ),
+    },
+    
+    {
+      label: "Actual Amount",
+      dataIndex: "actual_amount",
+      key: "actual_amount",
       render: (text) => <span className="text-gray-700">{text}</span>,
     },
     {
@@ -116,8 +140,8 @@ const OutstandPage = () => {
     },
     {
       label: "Monthly Installment",
-      dataIndex: "monthly_installment",
-      key: "monthly_installment",
+      dataIndex: "installment",
+      key: "installment",
       render: (amount) => (
         <span className="font-medium text-blue-600">
           ${parseFloat(amount).toLocaleString()}
@@ -126,8 +150,24 @@ const OutstandPage = () => {
     },
     {
       label: "Outstanding Amount",
-      dataIndex: "outstanding_amount",
-      key: "outstanding_amount",
+      dataIndex: "outstand",
+      key: "outstand",
+      render: (amount) => (
+        <span className="font-bold text-red-600">
+          ${parseFloat(amount).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      label: "Outstand Date",
+      dataIndex: "outstand_date",
+      key: "outstand_date",
+      render: (date) => (date ? getFormattedDate(date) : "N/A"),
+    },
+    {
+      label: "Due Payment",
+      dataIndex: "due_payment",
+      key: "due_payment",
       render: (amount) => (
         <span className="font-bold text-red-600">
           ${parseFloat(amount).toLocaleString()}

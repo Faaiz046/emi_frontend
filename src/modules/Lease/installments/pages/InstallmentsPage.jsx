@@ -8,12 +8,18 @@ import { installmentApi } from "../services/installment";
 import { leaseAccountApi } from "../../services";
 import toast from "../../../../utils/toast";
 import { getFormattedDate, formatCurrency } from "../../../../utils/common";
-
+import DatePicker from "../../../../shared/components/ui/DatePickerComponent";
 const InstallmentsPage = () => {
   const { account_id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [filtersDate, setFiltersDate] = useState({
+    start_date: "",
+    end_date: "",
+  });
+  console.log(filtersDate);
+
   const [pagination, setPagination] = useState({
     page: 0,
     limit: 10,
@@ -643,14 +649,14 @@ const InstallmentsPage = () => {
           <div className="flex border border-gray-300 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("table")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`w-44 h-10 flex items-center justify-center text-sm font-medium transition-colors ${
                 viewMode === "table"
                   ? "bg-green-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               <svg
-                className="w-4 h-4 inline mr-2"
+                className="w-4 h-4 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -664,16 +670,17 @@ const InstallmentsPage = () => {
               </svg>
               Table View
             </button>
+
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`w-44 h-10 flex items-center justify-center text-sm font-medium transition-colors ${
                 viewMode === "grid"
                   ? "bg-green-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
               <svg
-                className="w-4 h-4 inline mr-2"
+                className="w-4 h-4 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -688,6 +695,8 @@ const InstallmentsPage = () => {
               Grid View
             </button>
           </div>
+
+          <DatePicker setFilter={setFiltersDate} />
         </div>
       </div>
 

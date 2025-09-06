@@ -85,7 +85,7 @@ const RoleList = () => {
       resetForm();
     } catch (error) {
       console.error('Error saving role:', error);
-      Toast.error('Failed to save role');
+      Toast.error(error.message || 'Failed to save role');
     } finally {
       setLoading(false);
     }
