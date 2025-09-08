@@ -1,8 +1,15 @@
-import React from 'react';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './Table';
-import { Button } from './Button';
-import { Spinner } from './Spinner';
-import PageLoader from './PageLoader';
+import React from "react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "./Table";
+import { Button } from "./Button";
+import PageLoader from "./PageLoader";
+
 // Pagination component
 const Pagination = ({ pagination, onPageChange }) => {
   if (!pagination || !onPageChange) return null;
@@ -16,7 +23,7 @@ const Pagination = ({ pagination, onPageChange }) => {
       <div className="text-sm text-gray-700">
         Showing {startItem} to {endItem} of {total} results
       </div>
-      
+
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"
@@ -26,11 +33,11 @@ const Pagination = ({ pagination, onPageChange }) => {
         >
           Previous
         </Button>
-        
+
         <span className="text-sm text-gray-700">
           Page {page + 1} of {totalPages}
         </span>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -46,16 +53,24 @@ const Pagination = ({ pagination, onPageChange }) => {
 
 // Empty state component
 const EmptyState = ({ message }) => (
-  <div className="text-center py-8 text-gray-500">
-    {message}
-  </div>
+  <div className="text-center py-8 text-gray-500">{message}</div>
 );
 
 // Table header component
-const TableHeaderRow = ({ columns }) => (
+const TableHeaderRow = ({ columns, rowSelection }) => (
   <TableRow>
+    {rowSelection && (
+      <TableHead className="w-12">
+        <input
+          type="checkbox"
+          checked={rowSelection?.selectAll}
+          onChange={rowSelection?.onSelectAll}
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+      </TableHead>
+    )}
     {columns.map((column, index) => (
-      <TableHead key={index} align={column.align || 'left'}>
+      <TableHead key={index} align={column.align || "left"}>
         {column.label}
       </TableHead>
     ))}
@@ -63,13 +78,29 @@ const TableHeaderRow = ({ columns }) => (
 );
 
 // Table body component
-const TableBodyRows = ({ data, columns }) => (
+const TableBodyRows = ({ data, columns, rowSelection }) => (
   <>
     {data.map((row, rowIndex) => (
       <TableRow key={row.id || rowIndex} hover>
+        {rowSelection && (
+          <TableCell className="w-12">
+            <input
+              type="checkbox"
+              checked={rowSelection?.selectedRowKeys?.includes(
+                row.id || rowIndex
+              )}
+              onChange={(e) =>
+                rowSelection?.onSelectRow?.(row, e.target.checked)
+              }
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </TableCell>
+        )}
         {columns.map((column, colIndex) => (
-          <TableCell key={colIndex} align={column.align || 'left'}>
-            {column.render ? column.render(row[column.key], row) : row[column.key]}
+          <TableCell key={colIndex} align={column.align || "left"}>
+            {column.render
+              ? column.render(row[column.key], row)
+              : row[column.key]}
           </TableCell>
         ))}
       </TableRow>
@@ -83,21 +114,20 @@ const DataTable = ({
   loading = false,
   pagination = null,
   onPageChange = null,
-  className = '',
-  emptyMessage = 'No data available',
-  loadingMessage = 'Loading...'
+  className = "",
+  emptyMessage = "No data available",
+  rowSelection = null,
 }) => {
-  console.log("🚀 ~ DataTable ~ data:", data)
   // Show loading state
   if (loading) {
     return (
-      // <Spinner 
-      //   variant="primary" 
-      //   text={loadingMessage} 
+      // <Spinner
+      //   variant="primary"
+      //   text={loadingMessage}
       //   layout="simple"
-      //   className={className} 
+      //   className={className}
       // />
-      <PageLoader height='h-[50vh]'/>
+      <PageLoader height="h-[50vh]" />
     );
   }
 
@@ -111,13 +141,17 @@ const DataTable = ({
   }
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full overflow-hidden ${className}`}>
       <Table>
         <TableHeader>
-          <TableHeaderRow columns={columns} />
+          <TableHeaderRow columns={columns} rowSelection={rowSelection} />
         </TableHeader>
         <TableBody>
-          <TableBodyRows data={data} columns={columns} />
+          <TableBodyRows
+            data={data}
+            columns={columns}
+            rowSelection={rowSelection}
+          />
         </TableBody>
       </Table>
 
@@ -126,4 +160,4 @@ const DataTable = ({
   );
 };
 
-export { DataTable }; 
+export { DataTable };

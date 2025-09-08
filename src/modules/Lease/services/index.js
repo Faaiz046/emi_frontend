@@ -41,8 +41,8 @@ export const leaseAccountApi = {
   create: async (payload = {}) => {
     const { images = {}, ...formFields } = payload;
 
-    // Clean up the form data - remove fields that shouldn't be sent
-    const { ...cleanFormFields } = formFields;
+    // // Clean up the form data - remove fields that shouldn't be sent
+    // const { ...cleanFormFields } = formFields;
 
     const formData = new FormData();
 
@@ -88,7 +88,7 @@ export const leaseAccountApi = {
     const { images = {}, ...formFields } = payload;
 
     // Clean up the form data - remove fields that shouldn't be sent
-    const { ...cleanFormFields } = formFields;
+    // const { ...cleanFormFields } = formFields;
 
     const formData = new FormData();
 

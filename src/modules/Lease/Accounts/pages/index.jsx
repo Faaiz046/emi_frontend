@@ -546,8 +546,15 @@ const AccountsListPage = () => {
                         Remaining Balance
                       </label>
                       <p className="text-rose-900 text-base font-medium mt-1">
-                        {selectedAccount.remaining_balance
-                          ? formatCurrency(selectedAccount.remaining_balance)
+                        {selectedAccount.installment_price &&
+                        selectedAccount?.advance
+                          ? formatCurrency(
+                              selectedAccount.installment_price -
+                                selectedAccount?.advance
+                            )
+                          : selectedAccount.installment_price &&
+                            !selectedAccount?.advance
+                          ? formatCurrency(selectedAccount.installment_price)
                           : "N/A"}
                       </p>
                     </div>

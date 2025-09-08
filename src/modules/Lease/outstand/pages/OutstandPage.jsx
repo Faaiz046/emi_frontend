@@ -4,8 +4,10 @@ import { DataTable } from "../../../../shared/components/ui/DataTable";
 import { Card } from "../../../../shared/components/ui/Card";
 import { Badge } from "../../../../shared/components/ui/Badge";
 import { Spinner } from "../../../../shared/components/ui/Spinner";
+import Select from "../../../../shared/components/ui/Select";
 import Toast from "../../../../utils/toast";
 import { outstandApi } from "../../services/outstand";
+import { userApi } from "../../../../services/user/api";
 import { getFormattedDate } from "../../../../utils/common";
 
 const OutstandPage = () => {
@@ -18,6 +20,29 @@ const OutstandPage = () => {
   });
   const [filters, setFilters] = useState({});
   const [viewMode, setViewMode] = useState("table");
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  const getUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const response = await userApi.getAll({ limit: 1000 });
+      if (response && response.data && Array.isArray(response.data)) {
+        const userOptions = response.data.map((user) => ({
+          value: user.id,
+          label: `${user.name} (${user.email})`,
+        }));
+        setUsers(userOptions);
+      }
+    } catch (error) {
+      console.error("Error loading users:", error);
+      Toast.error("Failed to load users");
+    } finally {
+      setUsersLoading(false);
+    }
+  };
 
   const getOutstandData = async () => {
     setLoading(true);
@@ -28,10 +53,12 @@ const OutstandPage = () => {
         limit: pagination.pageSize,
       });
 
-      console.log("🚀 ~ getOutstandData ~ response:", response);
-
       // Ensure we have valid data
-      if (response && response.data?.data && Array.isArray(response.data?.data)) {
+      if (
+        response &&
+        response.data?.data &&
+        Array.isArray(response.data?.data)
+      ) {
         setData(response.data?.data);
         setPagination((prev) => ({
           ...prev,
@@ -68,8 +95,25 @@ const OutstandPage = () => {
       setLoading(false);
     }
   };
+  const clearOutstandData = async () => {
+    setLoading(true);
+    try {
+      const response = await outstandApi.clear({ days: 0 });
+
+      if (response && response.data) {
+        Toast.success("Outstand data cleared successfully");
+      }
+    } catch (error) {
+      console.error("Error clear outstand data:", error);
+      Toast.error("Failed to clear outstand data, showing demo data");
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     getOutstandData();
+    getUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTableChange = (pagination, filters) => {
@@ -78,6 +122,69 @@ const OutstandPage = () => {
     getOutstandData();
   };
 
+  const handleRowSelect = (row, checked) => {
+    if (checked) {
+      setSelectedRows((prev) => [...prev, row.id || row]);
+    } else {
+      setSelectedRows((prev) => prev.filter((id) => id !== (row.id || row)));
+    }
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allRowIds = data.map((row) => row.id || row);
+      setSelectedRows(allRowIds);
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleUserSelect = (userId) => {
+    setSelectedUser(userId);
+  };
+  const assignRecoverOfficer = async () => {
+    try {
+      setLoading(true);
+      const res = await outstandApi.assign_recovery_officer({
+        payment_ids: selectedRows,
+        recovery_officer_id: selectedUser,
+      });
+
+      const responseData = res?.data || res;
+
+      if (responseData && responseData.updated_count > 0) {
+        // Update the data state with the new recovery officer information
+        setData((prevData) =>
+          prevData.map((item) => {
+            // Check if this item's ID is in the assigned payment_ids
+            if (responseData.payment_ids.includes(item.id)) {
+              return {
+                ...item,
+                recovery_officer_id: responseData.recovery_officer,
+              };
+            }
+            return item;
+          })
+        );
+
+        // Clear selections after successful assignment
+        setSelectedRows([]);
+        setSelectedUser("");
+
+        Toast.success(
+          `Successfully assigned ${responseData.updated_count} account(s) to ${responseData.recovery_officer.name}`
+        );
+      } else {
+        Toast.warning("No accounts were updated");
+      }
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message || "Failed to assign recovery officer";
+      Toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
   const columns = [
     {
       label: "Account No",
@@ -94,6 +201,12 @@ const OutstandPage = () => {
       render: (text) => <span className="font-medium">{text}</span>,
     },
     {
+      label: "Recovery Officer",
+      dataIndex: "recovery_officer_id",
+      key: "recovery_officer_id",
+      render: (text) => <span className="text-gray-700">{text?.name}</span>,
+    },
+    {
       label: "Son Of",
       dataIndex: "son_of",
       key: "son_of",
@@ -101,9 +214,9 @@ const OutstandPage = () => {
     },
     {
       label: "Branch",
-      dataIndex: "branch",
-      key: "branch",
-      render: (text) => <span className="text-gray-700">{text.branch_name}</span>,
+      dataIndex: "branch_name",
+      key: "branch_name",
+      render: (text) => <span className="text-gray-700">{text}</span>,
     },
     {
       label: "Product",
@@ -121,7 +234,7 @@ const OutstandPage = () => {
         </span>
       ),
     },
-    
+
     {
       label: "Actual Amount",
       dataIndex: "actual_amount",
@@ -235,7 +348,13 @@ const OutstandPage = () => {
         // pagination={pagination}
         onChange={handleTableChange}
         rowKey="id"
-        className="w-full"
+        // className="w-full"
+        rowSelection={{
+          selectedRowKeys: selectedRows,
+          onSelectRow: handleRowSelect,
+          selectAll: selectedRows.length === data.length && data.length > 0,
+          onSelectAll: handleSelectAll,
+        }}
       />
     );
   };
@@ -353,7 +472,36 @@ const OutstandPage = () => {
               "Load Outstand"
             )}
           </Button>
-
+          <Button
+            onClick={clearOutstandData}
+            disabled={loading}
+            variant="destructive"
+            className="min-w-[120px]"
+          >
+            {loading ? (
+              <>
+                <Spinner size="sm" className="mr-2" />
+                Loading...
+              </>
+            ) : (
+              "Clear"
+            )}
+          </Button>
+          <Button
+            onClick={loadOutstandData}
+            disabled={loading}
+            variant="primary"
+            className="min-w-[120px]"
+          >
+            {loading ? (
+              <>
+                <Spinner size="sm" className="mr-2" />
+                Loading...
+              </>
+            ) : (
+              "Assign"
+            )}
+          </Button>
           <div className="flex items-center gap-2">
             <Button
               variant={viewMode === "table" ? "primary" : "outline"}
@@ -391,8 +539,7 @@ const OutstandPage = () => {
               {Array.isArray(data) && data.length > 0
                 ? data
                     .reduce(
-                      (sum, item) =>
-                        sum + parseFloat(item.outstanding_amount || 0),
+                      (sum, item) => sum + parseFloat(item.outstand || 0),
                       0
                     )
                     .toLocaleString()
@@ -418,24 +565,52 @@ const OutstandPage = () => {
         </Card>
         <Card className="p-4">
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">
-              Avg Monthly Installment
-            </p>
+            <p className="text-sm text-gray-600 mb-1">Monthly Installment</p>
             <p className="text-2xl font-bold text-purple-600">
               $
               {Array.isArray(data) && data.length > 0
-                ? (
-                    data.reduce(
-                      (sum, item) =>
-                        sum + parseFloat(item.monthly_installment || 0),
+                ? data
+                    .reduce(
+                      (sum, item) => sum + parseFloat(item.installment || 0),
                       0
-                    ) / data.length
-                  ).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                    )
+                    .toLocaleString(undefined, { maximumFractionDigits: 0 })
                 : "0"}
             </p>
           </div>
         </Card>
       </div>
+
+      {/* User Selection */}
+      <Card className="p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex-1">
+            <Select
+              label="Select User"
+              placeholder="Choose a user to assign..."
+              options={users}
+              value={selectedUser}
+              onChange={handleUserSelect}
+              loading={usersLoading}
+              className="max-w-md"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">
+              Selected: {selectedRows.length} rows
+            </span>
+            {selectedUser && selectedRows.length > 0 && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={assignRecoverOfficer}
+              >
+                Assign Selected
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
 
       {/* Data Display */}
       <Card className="p-4">
