@@ -141,7 +141,7 @@ const DataTable = ({
   }
 
   return (
-    <div className={`w-full overflow-hidden ${className}`}>
+    <div className={`overflow-auto  relative overflow-x-auto ${className}`}>
       <Table>
         <TableHeader>
           <TableHeaderRow columns={columns} rowSelection={rowSelection} />

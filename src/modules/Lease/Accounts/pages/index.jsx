@@ -7,6 +7,7 @@ import toast from "../../../../utils/toast";
 import { getFormattedDate, formatCurrency } from "../../../../utils/common";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../../../shared/components/ui/Card";
+import SelectInput from "../../../../shared/components/ui/SelectInput";
 
 const AccountsListPage = () => {
   const navigate = useNavigate();
@@ -115,7 +116,7 @@ const AccountsListPage = () => {
             setFilters((prev) => ({ ...prev, branch_id: e.target.value }))
           }
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.status}
           onChange={(e) =>
@@ -125,7 +126,17 @@ const AccountsListPage = () => {
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
-        </select>
+        </select> */}
+        <SelectInput
+          options={[
+            { label: "Active", value: "active" },
+            { label: "Inactive", value: "inactive" },
+          ]}
+          value={filters.status}
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Status"
+        />
       </div>
 
       <DataTable

@@ -35,6 +35,9 @@ import {
   BellIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import { CiBank } from "react-icons/ci";
+import { HiOutlineCash } from "react-icons/hi";
+
 import { navigation } from "../../config/menu.config";
 
 const Sidebar = () => {
@@ -104,6 +107,8 @@ const Sidebar = () => {
     TagIcon,
     Squares2X2Icon,
     CubeIcon,
+    CiBank,
+    HiOutlineCash
   };
 
   // Get sidebar classes based on layout type and selected color

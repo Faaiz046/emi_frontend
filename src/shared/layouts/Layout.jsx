@@ -225,20 +225,20 @@ const Layout = () => {
       
       default:
         return (
-          <>
+          <div className='flex flex-col min-h-screen w-full overscroll-none'>
             <Sidebar />
             <div className={getMainClasses()}>
               {navbar.isVisible && <Navbar />}
               <main className={getContentClasses()}>
                 <ErrorBoundary>
-                  <Suspense fallback={<PageLoader />}>
+                  <Suspense fallback={<PageLoader variant='lazy'/>}>
                     <Outlet />
                   </Suspense>
                 </ErrorBoundary>
               </main>
               <Footer />
             </div>
-          </>
+          </div>
         );
     }
   };

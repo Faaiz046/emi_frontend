@@ -1,7 +1,7 @@
 import React from "react";
 import { cva, cn } from "../../../lib/utils";
 
-const tableVariants = cva("w-full border-collapse table-auto", {
+const tableVariants = cva("border-collapse table-auto", {
   variants: {
     variant: {
       default: "border border-gray-200",
@@ -28,14 +28,14 @@ const tableVariants = cva("w-full border-collapse table-auto", {
 
 const Table = React.forwardRef(
   ({ className, variant, size, hover, children, ...props }, ref) => (
-    <div className="w- overflow-auto relative overflow-x-auto">
+    <div className="w-full overflow-x-auto">
       <table
         ref={ref}
         className={tableVariants({
           variant,
           size,
           hover,
-          className,
+          className: cn(className, "min-w-full"),
         })}
         {...props}
       >
@@ -56,7 +56,7 @@ const TableHeader = React.forwardRef(
 const TableBody = React.forwardRef(({ className, children, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("divide-y divide-gray-200 bg-white", className)}
+    className={cn("divide-y divide-gray-200 bg-white ", className)}
     {...props}
   >
     {children}
@@ -104,7 +104,7 @@ const TableHead = React.forwardRef(
       <th
         ref={ref}
         className={cn(
-          "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+          "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap",
           alignClasses[align],
           className
         )}

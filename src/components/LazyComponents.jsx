@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import Layout from "../shared/layouts/Layout";
-
+import { PageLoader } from "../shared/components/ui/PageLoader";
 // Lazy load all CRUD components
 const DashboardPage = lazy(() =>
   import("../features/dashboard/pages/DashboardPage")
@@ -50,7 +50,7 @@ const LoadingSpinner = () => (
 // Higher-Order Component to wrap components with Suspense and Layout
 const lazyWrapper = (Component) => {
   return () => (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<PageLoader variant="lazy" />}>
       <Layout>
         <Component />
       </Layout>

@@ -10,6 +10,7 @@ import FilePicker from '../../../shared/components/ui/FilePicker';
 import Toast from '../../../utils/toast';
 import { getFormattedDate } from '../../../utils/common';
 import { PAGINATION } from '../../../constants/app.constant';
+import SelectInput from '../../../shared/components/ui/SelectInput';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -293,7 +294,7 @@ const ProductList = () => {
             onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
             className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           />
-          <select
+          {/* <select
             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             value={filters.category_id}
             onChange={(e) => setFilters(prev => ({ ...prev, category_id: e.target.value }))}
@@ -302,8 +303,16 @@ const ProductList = () => {
             {categories.map(category => (
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
-          </select>
-          <select
+          </select> */}
+          <SelectInput
+            options={categories.map(category => ({ label: category.name, value: category.id }))}
+            value={filters.category_id}
+            onChange={(value) => setFilters(prev => ({ ...prev, category_id: value }))}
+            valueProp="value"
+            labelProp="label"
+            placeholder="Select Category"
+          />
+          {/* <select
             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             value={filters.brand_id}
             onChange={(e) => setFilters(prev => ({ ...prev, brand_id: e.target.value }))}
@@ -312,8 +321,16 @@ const ProductList = () => {
             {brands.map(brand => (
               <option key={brand.id} value={brand.id}>{brand.name}</option>
             ))}
-          </select>
-          <select
+          </select> */}
+          <SelectInput
+            options={brands.map(brand => ({ label: brand.name, value: brand.id }))}
+            value={filters.brand_id}
+            onChange={(value) => setFilters(prev => ({ ...prev, brand_id: value }))}
+            valueProp="value"
+            labelProp="label"
+            placeholder="Select Brand"
+          />
+          {/* <select
             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             value={filters.is_active}
             onChange={(e) => setFilters(prev => ({ ...prev, is_active: e.target.value }))}
@@ -321,12 +338,23 @@ const ProductList = () => {
             <option value="">All Status</option>
             <option value="true">Active</option>
             <option value="false">Inactive</option>
-          </select>
+          </select> */}
+          <SelectInput
+            options={[
+              { label: "Active", value: "true" },
+              { label: "Inactive", value: "false" },
+            ]}
+            value={filters.is_active}
+            onChange={(value) => setFilters(prev => ({ ...prev, is_active: value }))}
+            valueProp="value"
+            labelProp="label"
+            placeholder="Select Status"
+          />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2">
         <DataTable
           data={products}
           columns={columns}

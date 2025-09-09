@@ -4,7 +4,8 @@ import { selectUser } from '../../../store/slices/authSlice';
 import { selectCompanies } from '../../../store/slices/companySlice';
 import { useNavigate } from 'react-router-dom';
 import DashboardCard from '../components/DashboardCard';
-
+import { FiUsers, FiShoppingCart, FiScissors, FiBarChart2, FiCalendar } from "react-icons/fi";
+import { FaBuilding, FaBoxOpen, FaMoneyBillWave } from "react-icons/fa";
 const DashboardPage = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
@@ -16,71 +17,71 @@ const DashboardPage = () => {
 
   const dashboardCards = [
     {
-      title: 'User Management',
-      description: 'Manage users, roles, and permissions',
-      icon: '👥',
-      color: 'bg-blue-500',
-      path: '/users',
-      stats: 'Active Users: 25'
+      title: "User Management",
+      description: "Manage users, roles, and permissions",
+      icon: <FiUsers className='text-white' />,
+      color: "bg-blue-500",
+      path: "/users",
+      stats: "Active Users: 25",
     },
     {
-      title: 'Company Management',
-      description: 'Manage company information and branches',
-      icon: '🏢',
-      color: 'bg-green-500',
-      path: '/company',
-      stats: 'Companies: 3'
+      title: "Company Management",
+      description: "Manage company information and branches",
+      icon: <FaBuilding className='text-white' />,
+      color: "bg-green-500",
+      path: "/company",
+      stats: "Companies: 3",
     },
     {
-      title: 'Product Catalog',
-      description: 'Manage brands, categories, and products',
-      icon: '📦',
-      color: 'bg-purple-500',
-      path: '/products',
-      stats: 'Products: 150+'
+      title: "Product Catalog",
+      description: "Manage brands, categories, and products",
+      icon: <FaBoxOpen className='text-white' />,
+      color: "bg-purple-500",
+      path: "/products",
+      stats: "Products: 150+",
     },
     {
-      title: 'Lease Accounts',
-      description: 'Manage installment and lease accounts',
-      icon: '💰',
-      color: 'bg-yellow-500',
-      path: '/accounts',
-      stats: 'Active Accounts: 45'
+      title: "Lease Accounts",
+      description: "Manage installment and lease accounts",
+      icon: <FaMoneyBillWave className='text-white' />,
+      color: "bg-yellow-500",
+      path: "/accounts",
+      stats: "Active Accounts: 45",
     },
     {
-      title: 'POS System',
-      description: 'Point of sale and inventory management',
-      icon: '🛒',
-      color: 'bg-indigo-500',
-      path: '/pos/sales',
-      stats: 'Today\'s Sales: $2,450'
+      title: "POS System",
+      description: "Point of sale and inventory management",
+      icon: <FiShoppingCart className='text-white' />,
+      color: "bg-indigo-500",
+      path: "/pos/sales",
+      stats: "Today's Sales: $2,450",
     },
     {
-      title: 'Tailor Management',
-      description: 'Custom orders and measurements',
-      icon: '✂️',
-      color: 'bg-pink-500',
-      path: '/tailor/orders',
-      stats: 'Active Orders: 12'
+      title: "Tailor Management",
+      description: "Custom orders and measurements",
+      icon: <FiScissors className='text-white' />,
+      color: "bg-pink-500",
+      path: "/tailor/orders",
+      stats: "Active Orders: 12",
     },
     {
-      title: 'Appointments',
-      description: 'Schedule and manage appointments',
-      icon: '📅',
-      color: 'bg-teal-500',
-      path: '/appointments/calendar',
-      stats: 'Today: 8 Appointments'
+      title: "Appointments",
+      description: "Schedule and manage appointments",
+      icon: <FiCalendar className='text-white' />,
+      color: "bg-teal-500",
+      path: "/appointments/calendar",
+      stats: "Today: 8 Appointments",
     },
     {
-      title: 'Analytics',
-      description: 'Business insights and reports',
-      icon: '📊',
-      color: 'bg-orange-500',
-      path: '/analytics',
-      stats: 'Revenue: +15% this month'
-    }
+      title: "Analytics",
+      description: "Business insights and reports",
+      icon: <FiBarChart2 className='text-white' />,
+      color: "bg-orange-500",
+      path: "/analytics",
+      stats: "Revenue: +15% this month",
+    },
   ];
-
+  
   return (
     <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

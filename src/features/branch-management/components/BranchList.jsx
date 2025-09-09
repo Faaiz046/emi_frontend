@@ -7,6 +7,7 @@ import Input from "../../../shared/components/ui/Input";
 import Toast from "../../../utils/toast";
 import { getFormattedDate } from "../../../utils/common";
 import { PAGINATION } from "../../../constants/app.constant";
+import SelectInput from "../../../shared/components/ui/SelectInput";
 
 const BranchList = () => {
   const [branches, setBranches] = useState([]);
@@ -234,7 +235,7 @@ const BranchList = () => {
             setFilters((prev) => ({ ...prev, search: e.target.value }))
           }
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.is_active}
           onChange={(e) =>
@@ -244,8 +245,21 @@ const BranchList = () => {
           <option value="">All Status</option>
           <option value="true">Active</option>
           <option value="false">Inactive</option>
-        </select>
-        <select
+        </select> */}
+        <SelectInput
+          options={[
+            { label: "Active", value: "true" },
+            { label: "Inactive", value: "false" },
+          ]}
+          value={filters.is_active}
+          onChange={(value) =>
+            setFilters((prev) => ({ ...prev, is_active: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Status"
+        />
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.is_headquarters}
           onChange={(e) =>
@@ -255,7 +269,20 @@ const BranchList = () => {
           <option value="">All Branches</option>
           <option value="true">Headquarters</option>
           <option value="false">Regular Branches</option>
-        </select>
+        </select> */}
+        <SelectInput
+          options={[
+            { label: "Headquarters", value: "true" },
+            { label: "Regular Branches", value: "false" },
+          ]}
+          value={filters.is_headquarters}
+          onChange={(value) =>
+            setFilters((prev) => ({ ...prev, is_headquarters: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Branches"
+        />
         <Input
           placeholder="Filter by area..."
           value={filters.branch_area}

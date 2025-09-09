@@ -70,6 +70,7 @@ const Navbar = () => {
       '/products': 'Product Management',
       '/analytics': 'Analytics',
       '/settings': 'Settings',
+      'lease/bank': 'Bank Accounts',
     };
     return pathTitles[currentPath] || 'Dashboard';
   };

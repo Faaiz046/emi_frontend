@@ -27,7 +27,8 @@ import {
 } from "../../../shared/components/ui/Modal";
 import Toast from "../../../utils/toast";
 import { getFormattedDate } from "../../../utils/common";
-
+import PageHeader from "../../../shared/components/ui/PageHeader";
+import SelectInput from "../../../shared/components/ui/SelectInput";
 // Inject reducer at module level
 injectReducer("company", companyReducer);
 
@@ -253,11 +254,15 @@ const CompanyList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Company Management</h2>
         <Button onClick={() => setShowModal(true)}>Add Company</Button>
-      </div>
-
+      </div> */}
+      <PageHeader
+        title="Company Management"
+        buttonLabel="Add Company"
+        onClick={() => setShowModal(true)}
+      />
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Input
@@ -265,7 +270,7 @@ const CompanyList = () => {
           value={filters.search}
           onChange={(e) => dispatch(setFilters({ search: e.target.value }))}
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.status}
           onChange={(e) => dispatch(setFilters({ status: e.target.value }))}
@@ -273,8 +278,21 @@ const CompanyList = () => {
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
-        </select>
-        <select
+        </select> */}
+        <SelectInput
+          options={[
+            { label: "Active", value: "true" },
+            { label: "Inactive", value: "false" },
+          ]}
+          value={filters.is_active}
+          onChange={(value) =>
+            dispatch(setFilters({ is_active: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Status"
+        />
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.subscription_plan}
           onChange={(e) =>
@@ -285,7 +303,20 @@ const CompanyList = () => {
           <option value="basic">Basic</option>
           <option value="premium">Premium</option>
           <option value="enterprise">Enterprise</option>
-        </select>
+        </select> */}
+        <SelectInput
+          options={[{ label: "Basic", value: "basic" },
+            { label: "Premium", value: "premium" },
+            { label: "Enterprise", value: "enterprise" },
+          ]}
+          value={filters.subscription_plan}
+          onChange={(value) =>
+            dispatch(setFilters({ subscription_plan: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Plan"
+        />
       </div>
 
       {/* Table */}

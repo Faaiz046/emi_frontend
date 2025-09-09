@@ -8,7 +8,7 @@ import FilePicker from '../../../shared/components/ui/FilePicker';
 import Toast from '../../../utils/toast';
 import { getFormattedDate } from '../../../utils/common';
 import { PAGINATION } from '../../../constants/app.constant';
-
+import SelectInput from '../../../shared/components/ui/SelectInput';
 const BrandList = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -232,7 +232,7 @@ const BrandList = () => {
           value={filters.search}
           onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.is_active}
           onChange={(e) => setFilters(prev => ({ ...prev, is_active: e.target.value }))}
@@ -240,7 +240,14 @@ const BrandList = () => {
           <option value="">All Status</option>
           <option value="true">Active</option>
           <option value="false">Inactive</option>
-        </select>
+        </select> */}
+        <SelectInput
+          options={[{ label: 'Active', value: 'true' }, { label: 'Inactive', value: 'false' }]}
+          value={filters.is_active}
+          onChange={(value) => setFilters(prev => ({ ...prev, is_active: value }))}
+          valueProp="value"
+          labelProp="label"
+        />
         <Input
           placeholder="Filter by name..."
           value={filters.name}

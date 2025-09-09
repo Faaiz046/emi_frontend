@@ -9,7 +9,14 @@ import Toast from "../../../../utils/toast";
 import { outstandApi } from "../../services/outstand";
 import { userApi } from "../../../../services/user/api";
 import { getFormattedDate } from "../../../../utils/common";
+import {
+  UsersIcon,
+  BanknotesIcon,
+  ArrowUpCircleIcon,
+  CalendarIcon,
+} from "@heroicons/react/24/outline";
 
+import PageLoader from "../../../../shared/components/ui/PageLoader";
 const OutstandPage = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -187,18 +194,12 @@ const OutstandPage = () => {
   };
   const columns = [
     {
-      label: "Account No",
-      dataIndex: "acc_no",
-      key: "acc_no",
+      label: "Outstand Date",
+      dataIndex: "outstand_date",
+      key: "outstand_date",
       render: (text) => (
-        <span className="font-semibold text-blue-600">{text}</span>
+        <span className=" text-gray-700">{getFormattedDate(text)}</span>
       ),
-    },
-    {
-      label: "Customer Name",
-      dataIndex: "customer",
-      key: "customer",
-      render: (text) => <span className="font-medium">{text}</span>,
     },
     {
       label: "Recovery Officer",
@@ -207,117 +208,139 @@ const OutstandPage = () => {
       render: (text) => <span className="text-gray-700">{text?.name}</span>,
     },
     {
-      label: "Son Of",
-      dataIndex: "son_of",
-      key: "son_of",
-      render: (text) => <span className="text-gray-600">{text}</span>,
+      label: "Account No",
+      dataIndex: "acc_no",
+      key: "acc_no",
+      render: (text) => <span className=" text-gray-700">{text}</span>,
     },
     {
-      label: "Branch",
-      dataIndex: "branch_name",
-      key: "branch_name",
-      render: (text) => <span className="text-gray-700">{text}</span>,
-    },
-    {
-      label: "Product",
-      dataIndex: "product_name",
-      key: "product_name",
-      render: (text) => <span className="text-gray-700">{text}</span>,
-    },
-    {
-      label: "Paid Amount",
-      dataIndex: "paid_amount",
-      key: "paid_amount",
-      render: (amount) => (
-        <span className="font-semibold text-green-600">
-          ${parseFloat(amount).toLocaleString()}
-        </span>
-      ),
+      label: "Customer Name",
+      dataIndex: "customer",
+      key: "customer",
+      render: (text) => <span className=" text-gray-700">{text}</span>,
     },
 
+    // {
+    //   label: "Branch",
+    //   dataIndex: "branch_name",
+    //   key: "branch_name",
+    //   render: (text) => <span className="text-gray-700">{text}</span>,
+    // },
+    // {
+    //   label: "Product",
+    //   dataIndex: "product_name",
+    //   key: "product_name",
+    //   render: (text) => <span className="text-gray-700">{text}</span>,
+    // },
+    // {
+    //   label: "Paid Amount",
+    //   dataIndex: "paid_amount",
+    //   key: "paid_amount",
+    //   render: (amount) => (
+    //     <span className="font-semibold text-green-600">
+    //       ${parseFloat(amount).toLocaleString()}
+    //     </span>
+    //   ),
+    // },
+
+    // {
+    //   label: "Actual Amount",
+    //   dataIndex: "actual_amount",
+    //   key: "actual_amount",
+    //   render: (text) => <span className="text-gray-700">{text}</span>,
+    // },
+    // {
+    //   label: "Advance Amount",
+    //   dataIndex: "advance_amount",
+    //   key: "advance_amount",
+    //   render: (amount) => (
+    //     <span className="font-semibold text-green-600">
+    //       ${parseFloat(amount).toLocaleString()}
+    //     </span>
+    //   ),
+    // },
     {
-      label: "Actual Amount",
-      dataIndex: "actual_amount",
-      key: "actual_amount",
-      render: (text) => <span className="text-gray-700">{text}</span>,
-    },
-    {
-      label: "Advance Amount",
-      dataIndex: "advance_amount",
-      key: "advance_amount",
-      render: (amount) => (
-        <span className="font-semibold text-green-600">
-          ${parseFloat(amount).toLocaleString()}
-        </span>
-      ),
-    },
-    {
-      label: "Monthly Installment",
+      label: "Installment",
       dataIndex: "installment",
       key: "installment",
-      render: (amount) => (
-        <span className="font-medium text-blue-600">
-          ${parseFloat(amount).toLocaleString()}
-        </span>
-      ),
+      render: (amount) => <span className=" text-gray-700">{amount}</span>,
     },
     {
       label: "Outstanding Amount",
-      dataIndex: "outstand",
-      key: "outstand",
-      render: (amount) => (
-        <span className="font-bold text-red-600">
-          ${parseFloat(amount).toLocaleString()}
-        </span>
-      ),
-    },
-    {
-      label: "Outstand Date",
-      dataIndex: "outstand_date",
-      key: "outstand_date",
-      render: (date) => (date ? getFormattedDate(date) : "N/A"),
-    },
-    {
-      label: "Due Payment",
       dataIndex: "due_payment",
       key: "due_payment",
       render: (amount) => (
-        <span className="font-bold text-red-600">
-          ${parseFloat(amount).toLocaleString()}
-        </span>
-      ),
-    },
-    {
-      label: "Pending Installments",
-      dataIndex: "pending_installments",
-      key: "pending_installments",
-      render: (count) => (
-        <Badge variant="warning" className="font-semibold">
-          {count} months
-        </Badge>
-      ),
-    },
-    {
-      label: "Last Payment",
-      dataIndex: "last_payment_date",
-      key: "last_payment_date",
-      render: (date) => (
-        <span className="text-gray-600">
-          {new Date(date).toLocaleDateString()}
-        </span>
-      ),
-    },
-    {
-      label: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Badge
-          variant={status === "active" ? "success" : "danger"}
-          className="capitalize"
+        <span
+          className="
+       text-gray-700"
         >
-          {status}
-        </Badge>
+          {amount}
+        </span>
+      ),
+    },
+    // {
+    //   label: "Outstand Date",
+    //   dataIndex: "outstand_date",
+    //   key: "outstand_date",
+    //   render: (date) => (date ? getFormattedDate(date) : "N/A"),
+    // },
+    // {
+    //   label: "Due Payment",
+    //   dataIndex: "due_payment",
+    //   key: "due_payment",
+    //   render: (amount) => (
+    //     <span className="font-bold text-red-600">
+    //       ${parseFloat(amount).toLocaleString()}
+    //     </span>
+    //   ),
+    // },
+    // {
+    //   label: "Pending Installments",
+    //   dataIndex: "pending_installments",
+    //   key: "pending_installments",
+    //   render: (count) => (
+    //     <Badge variant="warning" className="font-semibold">
+    //       {count} months
+    //     </Badge>
+    //   ),
+    // },
+    // {
+    //   label: "Last Payment",
+    //   dataIndex: "last_payment_date",
+    //   key: "last_payment_date",
+    //   render: (date) => (
+    //     <span className="text-gray-600">
+    //       {new Date(date).toLocaleDateString()}
+    //     </span>
+    //   ),
+    // },
+    // {
+    //   label: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status) => (
+    //     <Badge
+    //       variant={status === "active" ? "success" : "danger"}
+    //       className="capitalize"
+    //     >
+    //       {status}
+    //     </Badge>
+    //   ),
+    // },
+    {
+      label: "Balance",
+      dataIndex: "balance",
+      key: "balance",
+      render: (amount) => (
+        <span className=" text-gray-700">{amount}</span>
+      ),
+    },
+    {
+      label: "Fine",
+      dataIndex: "fine",
+      key: "fine",
+      render: (amount) => (
+        <span className=" text-gray-700">{amount}</span>
       ),
     },
   ];
@@ -325,20 +348,21 @@ const OutstandPage = () => {
   const renderTableView = () => {
     if (loading) {
       return (
-        <div className="text-center py-8">
-          <Spinner size="lg" />
-          <p className="mt-2 text-gray-600">Loading outstand data...</p>
-        </div>
+        // <div className="text-center py-8">
+        //   <Spinner size="lg" />
+        //   <p className="mt-2 text-gray-600">Loading outstand data...</p>
+        // </div>
+        <PageLoader height="h-screen" />
       );
     }
 
-    if (!Array.isArray(data) || data.length === 0) {
-      return (
-        <div className="text-center py-8 text-gray-500">
-          No outstanding accounts found
-        </div>
-      );
-    }
+    // if (!Array.isArray(data) || data.length === 0) {
+    //   return (
+    //     <div className="text-center py-8 text-gray-500">
+    //       No outstanding accounts found
+    //     </div>
+    //   );
+    // }
 
     return (
       <DataTable
@@ -361,12 +385,7 @@ const OutstandPage = () => {
 
   const renderGridView = () => {
     if (loading) {
-      return (
-        <div className="text-center py-8">
-          <Spinner size="lg" />
-          <p className="mt-2 text-gray-600">Loading outstand data...</p>
-        </div>
-      );
+      return <PageLoader height="h-screen" />;
     }
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -522,66 +541,89 @@ const OutstandPage = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">Total Accounts</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {Array.isArray(data) ? data.length : 0}
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+              <UsersIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Accounts</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {Array.isArray(data) ? data.length : 0}
+              </p>
+            </div>
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">Total Outstanding</p>
-            <p className="text-2xl font-bold text-red-600">
-              $
-              {Array.isArray(data) && data.length > 0
-                ? data
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.outstand || 0),
-                      0
-                    )
-                    .toLocaleString()
-                : "0"}
-            </p>
+
+        <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg">
+              <BanknotesIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Outstanding</p>
+              <p className="text-2xl font-bold text-gray-900">
+                $
+                {Array.isArray(data) && data.length > 0
+                  ? data
+                      .reduce(
+                        (sum, item) => sum + parseFloat(item.outstand || 0),
+                        0
+                      )
+                      .toLocaleString()
+                  : "0"}
+              </p>
+            </div>
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">Total Advance</p>
-            <p className="text-2xl font-bold text-green-600">
-              $
-              {Array.isArray(data) && data.length > 0
-                ? data
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.advance_amount || 0),
-                      0
-                    )
-                    .toLocaleString()
-                : "0"}
-            </p>
+
+        <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+              <ArrowUpCircleIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Advance</p>
+              <p className="text-2xl font-bold text-gray-900">
+                $
+                {Array.isArray(data) && data.length > 0
+                  ? data
+                      .reduce(
+                        (sum, item) =>
+                          sum + parseFloat(item.advance_amount || 0),
+                        0
+                      )
+                      .toLocaleString()
+                  : "0"}
+              </p>
+            </div>
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">Monthly Installment</p>
-            <p className="text-2xl font-bold text-purple-600">
-              $
-              {Array.isArray(data) && data.length > 0
-                ? data
-                    .reduce(
-                      (sum, item) => sum + parseFloat(item.installment || 0),
-                      0
-                    )
-                    .toLocaleString(undefined, { maximumFractionDigits: 0 })
-                : "0"}
-            </p>
+
+        <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+              <CalendarIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Monthly Installment</p>
+              <p className="text-2xl font-bold text-gray-900">
+                $
+                {Array.isArray(data) && data.length > 0
+                  ? data
+                      .reduce(
+                        (sum, item) => sum + parseFloat(item.installment || 0),
+                        0
+                      )
+                      .toLocaleString(undefined, { maximumFractionDigits: 0 })
+                  : "0"}
+              </p>
+            </div>
           </div>
         </Card>
       </div>
 
-      {/* User Selection */}
       <Card className="p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="flex-1">
