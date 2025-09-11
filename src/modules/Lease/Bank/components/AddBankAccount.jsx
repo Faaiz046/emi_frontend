@@ -60,20 +60,7 @@ const AddBankAccount = ({
   }, [isEdit]);
 
   const queryClient = useQueryClient();
-  const {
-    data: banks_drd,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["banks_drd"],
-    queryFn: () => apiClient.get("/bank_accounts/drd").then((res) => res.data),
-    retry: false,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: Infinity,
-    cacheTime: Infinity,
-  });
+
 
   const { mutate: createBankAccount, isPending } = useMutation({
     mutationFn: () => {

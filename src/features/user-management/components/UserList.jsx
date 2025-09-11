@@ -19,6 +19,7 @@ import { getFormattedDate } from "../../../utils/common";
 import { PAGINATION } from "../../../constants/app.constant";
 import PageHeader from "../../../shared/components/ui/PageHeader";
 import SelectInput from "../../../shared/components/ui/SelectInput";
+
 // Inject reducer at module level
 injectReducer("user", userReducer);
 
@@ -29,6 +30,8 @@ const UserList = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [filterData, setFilterData] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -288,6 +291,27 @@ const UserList = () => {
     },
   ];
 
+  const handleFilter = (e) => {
+    const searchText = (e?.target?.value || "").trim().toLowerCase();
+    setSearchValue(searchText);
+   
+    if (searchText) {
+      const filtered = (users || []).filter((data) => {
+        const search = searchText.toLowerCase();
+        return (
+          (data?.name || "").toLowerCase().includes(search) ||
+          (data?.email || "").toLowerCase().includes(search) ||
+          (data?.username || "").toLowerCase().includes(search) ||
+          (data?.department || "").toLowerCase().includes(search) ||
+          (data?.position || "").toLowerCase().includes(search)
+        );
+      });
+      setFilterData(filtered);
+    } else {
+      setFilterData([]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* <div className="flex justify-between items-center">
@@ -303,89 +327,20 @@ const UserList = () => {
       />
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="w-[30%]">
         <Input
           placeholder="Search users..."
-          value={filters.search}
+          value={searchValue}
           onChange={(e) =>
-            setFilters((prev) => ({ ...prev, search: e.target.value }))
+            handleFilter(e)
           }
         />
-        {/* <select
-          className="border rounded px-3 py-2"
-          value={filters.role_id}
-          onChange={(e) => setFilters(prev => ({ ...prev, role_id: e.target.value }))}
-        >
-          <option value="">All Roles</option>
-          {roles.map(role => (
-            <option key={role.id} value={role.id}>{role.title}</option>
-          ))}
-        </select> */}
-        <SelectInput
-          options={roles.map((role) => ({ label: role.title, value: role.id }))}
-          value={filters.role_id}
-          onChange={(value) =>
-            setFilters((prev) => ({ ...prev, role_id: value }))
-          }
-          valueProp="value"
-          labelProp="title"
-          placeholder="Select Role"
-        />
-        {/* <select
-          className="border rounded px-3 py-2"
-          value={filters.is_active}
-          onChange={(e) => setFilters(prev => ({ ...prev, is_active: e.target.value }))}
-        >
-          <option value="">All Status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select> */}
-        <SelectInput
-          options={[
-            { label: "Active", value: "true" },
-            { label: "Inactive", value: "false" },
-          ]}
-          value={filters.is_active}
-          onChange={(value) =>
-            setFilters((prev) => ({ ...prev, is_active: value }))
-          }
-          valueProp="value"
-          labelProp="label"
-          placeholder="Select Status"
-        />
-        <SelectInput
-          options={[
-            { label: "IT", value: "IT" },
-            { label: "HR", value: "HR" },
-            { label: "Finance", value: "Finance" },
-            { label: "Sales", value: "Sales" },
-            { label: "Marketing", value: "Marketing" },
-          ]}
-          value={filters.department}
-          onChange={(value) =>
-            setFilters((prev) => ({ ...prev, department: value }))
-          }
-          valueProp="value"
-          labelProp="label"
-          placeholder="Select Department"
-        />
-        {/* <select
-          className="border rounded px-3 py-2"
-          value={filters.department}
-          onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}
-        >
-          <option value="">All Departments</option>
-          <option value="IT">IT</option>
-          <option value="HR">HR</option>
-          <option value="Finance">Finance</option>
-          <option value="Sales">Sales</option>
-          <option value="Marketing">Marketing</option>
-        </select> */}
+      
       </div>
 
       {/* Table */}
       <DataTable
-        data={users}
+        data={filterData.length > 0 ? filterData : users}
         columns={columns}
         loading={loading}
         pagination={pagination}
@@ -534,9 +489,10 @@ const UserList = () => {
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    hire_date: e.target.value,
+                    hire_date: new Date(e.target.value).toISOString(), 
                   }))
                 }
+                
               />
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">

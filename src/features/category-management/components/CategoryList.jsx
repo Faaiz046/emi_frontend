@@ -23,6 +23,8 @@ const CategoryList = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [filterData, setFilterData] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -237,6 +239,28 @@ const CategoryList = () => {
     },
   ];
 
+  const handleFilter = (e) => {
+    const searchText = (e?.target?.value || "").trim().toLowerCase();
+    setSearchValue(searchText);
+   
+    if (searchText) {
+      const filtered = (categories || []).filter((data) => {
+        const search = searchText.toLowerCase();
+        return (
+          (data?.name || "").toLowerCase().includes(search) ||
+          (data?.category_code || "").toLowerCase().includes(search) ||
+          (data?.description || "").toLowerCase().includes(search) ||
+          (data?.is_active || "").toLowerCase().includes(search) ||
+          (data?.products_count || "").toLowerCase().includes(search) 
+         
+        );
+      });
+      setFilterData(filtered);
+    } else {
+      setFilterData([]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -250,7 +274,8 @@ const CategoryList = () => {
           placeholder="Search categories..."
           value={filters.search}
           onChange={(e) =>
-            setFilters((prev) => ({ ...prev, search: e.target.value }))
+            // setFilters((prev) => ({ ...prev, search: e.target.value }))
+            handleFilter(e)
           }
         />
         {/* <select
@@ -262,14 +287,14 @@ const CategoryList = () => {
           <option value="true">Active</option>
           <option value="false">Inactive</option>
         </select> */}
-        <Input
+        {/* <Input
           placeholder="Filter by code..."
           value={filters.category_code}
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, category_code: e.target.value }))
           }
-        />
-        <SelectInput
+        /> */}
+        {/* <SelectInput
           options={[
             { label: "Active", value: "true" },
             { label: "Inactive", value: "false" },
@@ -281,12 +306,12 @@ const CategoryList = () => {
           valueProp="value"
           labelProp="label"
           placeholder="Select Status"
-        />
+        /> */}
       </div>
 
       {/* Table */}
       <DataTable
-        data={categories}
+        data={filterData.length > 0 ? filterData : categories}
         columns={columns}
         loading={loading}
         pagination={pagination}

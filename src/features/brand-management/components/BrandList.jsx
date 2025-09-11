@@ -14,6 +14,8 @@ const BrandList = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [filterData, setFilterData] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -124,7 +126,7 @@ const BrandList = () => {
       email: brand.email || '',
       phone: brand.phone || '',
       address: brand.address || '',
-      country: brand.country || '',
+      country: brand.country || '', 
       is_active: brand.is_active ?? true
     });
     setShowModal(true);
@@ -216,6 +218,27 @@ const BrandList = () => {
     }
   ];
 
+  const handleFilter = (e) => {
+    const searchText = (e?.target?.value || "").trim().toLowerCase();
+    setSearchValue(searchText);
+   
+    if (searchText) {
+      const filtered = (brands || []).filter((data) => {
+        const search = searchText.toLowerCase();
+        return (
+          (data?.name || "").toLowerCase().includes(search) ||
+          (data?.email || "").toLowerCase().includes(search) ||
+          (data?.phone || "").toLowerCase().includes(search) ||
+          (data?.country || "").toLowerCase().includes(search) 
+         
+        );
+      });
+      setFilterData(filtered);
+    } else {
+      setFilterData([]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -230,7 +253,8 @@ const BrandList = () => {
         <Input
           placeholder="Search brands..."
           value={filters.search}
-          onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+          // onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+          onChange={(e) => handleFilter(e)}
         />
         {/* <select
           className="border rounded px-3 py-2"
@@ -241,7 +265,7 @@ const BrandList = () => {
           <option value="true">Active</option>
           <option value="false">Inactive</option>
         </select> */}
-        <SelectInput
+        {/* <SelectInput
           options={[{ label: 'Active', value: 'true' }, { label: 'Inactive', value: 'false' }]}
           value={filters.is_active}
           onChange={(value) => setFilters(prev => ({ ...prev, is_active: value }))}
@@ -257,12 +281,12 @@ const BrandList = () => {
           placeholder="Filter by country..."
           value={filters.country}
           onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
-        />
+        /> */}
       </div>
 
       {/* Table */}
       <DataTable
-        data={brands}
+        data={filterData.length > 0 ? filterData : brands}
         columns={columns}
         loading={loading}
         pagination={pagination}

@@ -155,7 +155,7 @@ const DataTable = ({
         </TableBody>
       </Table>
 
-      <Pagination pagination={pagination} onPageChange={onPageChange} />
+      {/* <Pagination pagination={pagination} onPageChange={onPageChange} /> */}
     </div>
   );
 };
