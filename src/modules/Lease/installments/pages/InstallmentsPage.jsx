@@ -8,7 +8,8 @@ import { installmentApi } from "../services/installment";
 import { leaseAccountApi } from "../../services";
 import toast from "../../../../utils/toast";
 import { getFormattedDate, formatCurrency } from "../../../../utils/common";
-import DatePicker from "../../../../shared/components/ui/DatePickerComponent";
+import { RiLoader3Fill } from "react-icons/ri";
+import DateSelect from "../../../../shared/components/ui/DateSelect";
 const InstallmentsPage = () => {
   const { account_id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const InstallmentsPage = () => {
     start_date: "",
     end_date: "",
   });
-  console.log(filtersDate);
+
 
   const [pagination, setPagination] = useState({
     page: 0,
@@ -48,12 +49,14 @@ const InstallmentsPage = () => {
     if (!account_id) {
       fetchData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     pagination.page,
     pagination.limit,
     filters.search,
     filters.status,
     filters.payment_method,
+    filtersDate,
   ]);
 
   const loadAccount = async () => {
@@ -78,9 +81,11 @@ const InstallmentsPage = () => {
         search: filters.search,
         status: filters.status,
         payment_method: filters.payment_method,
+        start_date: filtersDate.start_date,
+        end_date: filtersDate.end_date,
       });
 
-      const rows = res?.data || res?.rows || res?.list || [];
+      const rows = res?.installments || [];
       const pg = res?.pagination || {
         page: res?.page ?? pagination.page,
         limit: res?.limit ?? pagination.limit,
@@ -107,9 +112,7 @@ const InstallmentsPage = () => {
     // Refresh the data after successful installment creation/update
     if (account_id) {
       // If viewing account-specific installments, refresh that list
-      // The InstallmentList component will handle its own refresh
     } else {
-      // If viewing all installments, refresh the main list
       fetchData();
     }
   };
@@ -176,8 +179,8 @@ const InstallmentsPage = () => {
 
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-center text-gray-500">
-                Loading installments...
+              <div className="flex justify-center items-center h-full overflow-hidden">
+                <RiLoader3Fill className="animate-spin w-10 h-10 text-blue-600" />
               </div>
             ) : data.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
@@ -696,7 +699,27 @@ const InstallmentsPage = () => {
             </button>
           </div>
 
-          <DatePicker setFilter={setFiltersDate} />
+          {/* <DateSelect setFilter={setFiltersDate} /> */}
+          <div className="relative">
+            <DateSelect
+              value={filtersDate.start_date}
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+                if (selectedDate) {
+                  const isoDate = new Date(selectedDate).toISOString();
+                  setFiltersDate({
+                    start_date: isoDate,
+                    end_date: isoDate,
+                  });
+                } else {
+                  setFiltersDate({
+                    start_date: "",
+                    end_date: "",
+                  });
+                }
+              }}
+            />
+          </div>
         </div>
       </div>
 

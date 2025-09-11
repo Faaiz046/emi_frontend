@@ -6,6 +6,28 @@ import {
   mockApiDelay,
 } from "../../services/mockData";
 
+const searchCompanies = (companies, searchTerm) => {
+  if (!searchTerm) return companies;
+
+  const search = searchTerm.toLowerCase();
+
+  return companies.filter((company) => {
+    const searchableFields = [
+      company.company_name || "",
+      company.email || "",
+      company.phone || "",
+      company.address || "",
+      company.license_key || "",
+      company.status || "",
+      company.subscription_plan || "",
+      company.max_users?.toString() || "",
+    ];
+    return searchableFields.some((field) =>
+      field.toLowerCase().includes(search)
+    );
+  });
+};
+
 // Async thunks
 export const fetchCompanies = createAsyncThunk(
   "company/fetchCompanies",
@@ -32,7 +54,14 @@ export const fetchCompanies = createAsyncThunk(
             company.company_name
               .toLowerCase()
               .includes(params.search.toLowerCase()) ||
-            company.email.toLowerCase().includes(params.search.toLowerCase())
+            company.email.toLowerCase().includes(params.search.toLowerCase()) ||
+            company.phone.toLowerCase().includes(params.search.toLowerCase()) ||
+            company.status
+              .toLowerCase()
+              .includes(params.search.toLowerCase()) ||
+            company.subscription_plan
+              .toLowerCase()
+              .includes(params.search.toLowerCase())
         );
       }
 

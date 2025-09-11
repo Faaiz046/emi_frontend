@@ -13,13 +13,15 @@ const appendFile = (formData, fieldName, fileOrFiles) => {
 export const leaseAccountApi = {
   // List Lease Accounts with pagination and filters
   list: async (params = {}) => {
-    const { page = 0, limit = 10, search, branch_id, status } = params;
+    const { page = 0, limit = 10, search, branch_id, status, start_date, end_date } = params;
     return apiClient.post("/lease_accounts/list", {
       page,
       limit,
       search,
       branch_id,
       status,
+      start_date,
+      end_date,
     });
   },
 

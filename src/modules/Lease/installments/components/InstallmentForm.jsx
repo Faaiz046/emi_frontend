@@ -9,7 +9,9 @@ import { leaseAccountApi } from "../../services";
 import { Spinner } from "../../../../shared/components";
 import { userApi } from "../../../../services/user/api";
 import Toast from "../../../../utils/toast";
-
+import { RiLoader3Fill } from "react-icons/ri";
+import { apiClient } from "../../../../services/api-client/api";
+import { useQuery } from "@tanstack/react-query";
 const InstallmentForm = ({
   isOpen,
   onClose,
@@ -35,7 +37,7 @@ const InstallmentForm = ({
     outstanding: "",
     fine: "0",
     fine_type: "fixed", // fixed or percentage
-    recovery_officer: "",
+    officer: "",
     discount: "0",
     balance: "",
     sms_sent: false,
@@ -49,16 +51,16 @@ const InstallmentForm = ({
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [accountDetails, setAccountDetails] = useState(null);
-
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (installment) {
       setFormData({
         recv_no: installment.recv_no || "",
-        recv_date: installment.recv_date
+        install_date: installment.recv_date
           ? new Date(installment.recv_date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
         model: installment.model || "",
-        account_id: installment.account_id || accountId || "",
+        account_id: "",
         acc_no: installment.acc_no || "",
         account_date: installment.account_date
           ? new Date(installment.account_date).toISOString().split("T")[0]
@@ -87,7 +89,7 @@ const InstallmentForm = ({
     } else {
       setFormData({
         recv_no: "",
-        recv_date: new Date().toISOString().split("T")[0],
+        install_date: new Date().toISOString().split("T")[0],
         model: "",
         account_id: accountId || "",
         acc_no: "",
@@ -111,6 +113,7 @@ const InstallmentForm = ({
         payment_method: "cash",
         bank_account_id: "",
         notes: "",
+        officer_id: "",
       });
     }
   }, [installment, accountId, preBalance]);
@@ -169,6 +172,7 @@ const InstallmentForm = ({
         // Update form fields with account details
         setFormData((prev) => ({
           ...prev,
+          account_id: accountData.id || "",
           customer_name: accountData.customer_name || "",
           son_of: accountData.son_of || "",
           account_date: accountData.process_date
@@ -186,6 +190,7 @@ const InstallmentForm = ({
           recovery_officer:
             accountData?.outStandPayment?.recovery_officer_id || "",
           outstand: accountData?.outStandPayment?.outstand || 0,
+          officer_id: accountData?.outStandPayment?.recovery_officer_id || "",
         }));
         toast.success(`Account #${accountData.acc_no} loaded successfully`);
       }
@@ -241,7 +246,7 @@ const InstallmentForm = ({
     }
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
 
       const payload = {
@@ -263,6 +268,7 @@ const InstallmentForm = ({
 
       if (installment) {
         await installmentApi.update(installment.id, payload);
+        setIsLoading(false);
         toast.success("Installment updated successfully");
       } else {
         await installmentApi.create(payload);
@@ -272,6 +278,7 @@ const InstallmentForm = ({
       onSuccess();
       onClose();
     } catch (error) {
+      setIsLoading(false);
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
@@ -286,7 +293,7 @@ const InstallmentForm = ({
   const handleClose = () => {
     setFormData({
       recv_no: "",
-      recv_date: new Date().toISOString().split("T")[0],
+      install_date: new Date().toISOString().split("T")[0],
       model: "",
       account_id: accountId || "",
       account_date: "",
@@ -318,6 +325,18 @@ const InstallmentForm = ({
     getUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { data: banks_drd } = useQuery({
+    queryKey: ["banks_drd"],
+    queryFn: () => apiClient.get("/bank_accounts/drd").then((res) => res.data),
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
+    cacheTime: Infinity,
+  });
+
   return (
     <Modal
       isOpen={isOpen}
@@ -325,9 +344,44 @@ const InstallmentForm = ({
       title={installment ? "Edit Installment" : "Add New Installment"}
       size="xl"
       onSubmit={handleSubmit}
+      loading={isLoading}
     >
       <div className="space-y-3">
         {/* Account Lookup Section - Compact */}
+        {error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setError(null)}
+                    className="bg-red-100 px-3 py-1 rounded text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
         <div className="bg-blue-50 p-2 rounded border border-blue-200">
           <h3 className="text-sm font-semibold text-blue-800 mb-2">
             Account Lookup
@@ -345,9 +399,9 @@ const InstallmentForm = ({
             />
             <Input
               label="Receipt Date"
-              name="recv_date"
+              name="install_date"
               type="date"
-              value={formData.recv_date}
+              value={formData.install_date}
               onChange={handleInputChange}
               required
               className="text-sm"
@@ -356,7 +410,7 @@ const InstallmentForm = ({
         </div>
 
         {/* Account Information Display - Very Compact */}
-        {accountDetails && !loading && !error ? (
+        {accountDetails && !loading ? (
           <>
             <div className="bg-gray-50 p-2 rounded border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-800 mb-2">
@@ -496,15 +550,21 @@ const InstallmentForm = ({
                   ]}
                   size="md"
                 />
+
                 {formData.payment_method === "bank" && (
-                  <Input
+                  <Select
                     label="Bank Account"
-                    name="bank_account_id"
-                    type="number"
-                    value={formData.bank_account_id}
-                    onChange={handleInputChange}
-                    placeholder="Bank account"
-                    className="text-sm"
+                    name="bank_account"
+                    value={formData.account_type}
+                    onChange={(value) =>
+                      handleInputChange({
+                        target: { name: "payment_method", value },
+                      })
+                    }
+                    options={banks_drd.map((bank) => ({
+                      value: bank.id,
+                      label: bank.account_title,
+                    }))}
                     size="md"
                   />
                 )}
@@ -512,10 +572,10 @@ const InstallmentForm = ({
                   label="Recovery Officer"
                   placeholder="Select a Recovery Officer"
                   options={users}
-                  value={formData.recovery_officer}
+                  value={formData.officer_id}
                   onChange={(value) =>
                     handleInputChange({
-                      target: { name: "recovery_officer", value },
+                      target: { name: "officer_id", value },
                     })
                   }
                   loading={loading}
@@ -559,44 +619,8 @@ const InstallmentForm = ({
             </div>
           </>
         ) : loading ? (
-          <div className="flex flex-col items-center justify-center py-8">
-            <Spinner size={"xl"} />
-            <p className="mt-4 text-sm text-gray-600">
-              Loading account details...
-            </p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
-                <div className="mt-3">
-                  <button
-                    type="button"
-                    onClick={() => setError(null)}
-                    className="bg-red-100 px-3 py-1 rounded text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center justify-center py-8 h-full min-h-[250px]">
+            <RiLoader3Fill className="animate-spin w-12 h-12 text-blue-600" />
           </div>
         ) : null}
       </div>

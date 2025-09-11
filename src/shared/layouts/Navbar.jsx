@@ -79,7 +79,7 @@ const Navbar = () => {
     try {
       await dispatch(logoutUser()).unwrap();
       // window.location.href = '/login';
-      // navigate('/login');
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     }
