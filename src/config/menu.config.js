@@ -78,8 +78,16 @@ export const navigation = {
         {
           id: "lease-outstand",
           label: "Outstand",
-          icon: "ExclamationTriangleIcon",
+          icon: "HiOutlineCash",
           path: "/lease/outstand",
+          badge: null,
+          type: "item",
+        },
+        {
+          id: "lease-bank",
+          label: "Bank",
+          icon: "CiBank",
+          path: "/lease/bank",
           badge: null,
           type: "item",
         },

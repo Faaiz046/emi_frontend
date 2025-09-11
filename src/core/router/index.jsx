@@ -11,8 +11,16 @@ import { posRoutes } from '../../modules/pos/routes.jsx';
 import { tailorRoutes } from '../../modules/tailor/routes.jsx';
 import { appointmentRoutes } from '../../modules/appointment/routes.jsx';
 import { leaseRoutes } from '../../modules/Lease/routes.jsx';
-
+import { useAppSelector } from "../../store/hooks"; 
+import { selectIsAuthenticated } from "../../store/slices/authSlice";
 // Create the router configuration
+
+
+const PrivateRoute = ({ element }) => {
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  return isAuthenticated ? element : <Navigate to="/login" replace />;
+};
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -20,11 +28,11 @@ export const router = createBrowserRouter([
   },
   {
     path: '/unauthorized',
-    element: <UnauthorizedPage />
+    element: <PrivateRoute element={<UnauthorizedPage />} />
   },
   {
     path: '/',
-    element: <Layout />,
+    element: <PrivateRoute element={<Layout />} />,
     children: [
       // Default route redirects to dashboard
       {

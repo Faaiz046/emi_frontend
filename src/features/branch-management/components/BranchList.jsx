@@ -7,12 +7,15 @@ import Input from "../../../shared/components/ui/Input";
 import Toast from "../../../utils/toast";
 import { getFormattedDate } from "../../../utils/common";
 import { PAGINATION } from "../../../constants/app.constant";
+import SelectInput from "../../../shared/components/ui/SelectInput";
 
 const BranchList = () => {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingBranch, setEditingBranch] = useState(null);
+  const [searchValue, setSearchValue] = useState(""); 
+  const [filterData, setFilterData] = useState([]);
   const [formData, setFormData] = useState({
     branch_name: "",
     address: "",
@@ -108,7 +111,7 @@ const BranchList = () => {
       resetForm();
     } catch (error) {
       console.error("Error saving branch:", error);
-      Toast.error("Failed to save branch");
+      Toast.error(error.message || "Failed to save branch");
     } finally {
       setLoading(false);
     }
@@ -218,6 +221,30 @@ const BranchList = () => {
     },
   ];
 
+  const handleFilter = (e) => {
+    const searchText = (e?.target?.value || "").trim().toLowerCase();
+    setSearchValue(searchText);
+   
+    if (searchText) {
+      const filtered = (branches || []).filter((data) => {
+        const search = searchText.toLowerCase();
+        return (
+          (data?.branch_name || "").toLowerCase().includes(search) ||
+          (data?.branch_area || "").toLowerCase().includes(search) ||
+          (data?.manager_name || "").toLowerCase().includes(search) ||
+          (data?.phone || "").toLowerCase().includes(search) ||
+          (data?.email || "").toLowerCase().includes(search) ||
+          (data?.capacity || "").toLowerCase().includes(search) ||
+          (data?.is_headquarters || "").toLowerCase().includes(search) ||
+          (data?.is_active || "").toLowerCase().includes(search)
+        );
+      });
+      setFilterData(filtered);
+    } else {
+      setFilterData([]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -229,12 +256,13 @@ const BranchList = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Input
           placeholder="Search branches..."
-          value={filters.search}
+          value={searchValue}
           onChange={(e) =>
-            setFilters((prev) => ({ ...prev, search: e.target.value }))
+            // setFilters((prev) => ({ ...prev, search: e.target.value }))
+            handleFilter(e)
           }
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.is_active}
           onChange={(e) =>
@@ -244,8 +272,21 @@ const BranchList = () => {
           <option value="">All Status</option>
           <option value="true">Active</option>
           <option value="false">Inactive</option>
-        </select>
-        <select
+        </select> */}
+        {/* <SelectInput
+          options={[
+            { label: "Active", value: "true" },
+            { label: "Inactive", value: "false" },
+          ]}
+          value={filters.is_active}
+          onChange={(value) =>
+            setFilters((prev) => ({ ...prev, is_active: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Status"
+        /> */}
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.is_headquarters}
           onChange={(e) =>
@@ -255,19 +296,32 @@ const BranchList = () => {
           <option value="">All Branches</option>
           <option value="true">Headquarters</option>
           <option value="false">Regular Branches</option>
-        </select>
+        </select> */}
+        {/* <SelectInput
+          options={[
+            { label: "Headquarters", value: "true" },
+            { label: "Regular Branches", value: "false" },
+          ]}
+          value={filters.is_headquarters}
+          onChange={(value) =>
+            setFilters((prev) => ({ ...prev, is_headquarters: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Branches"
+        />
         <Input
           placeholder="Filter by area..."
           value={filters.branch_area}
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, branch_area: e.target.value }))
           }
-        />
+        /> */}
       </div>
 
       {/* Table */}
       <DataTable
-        data={branches}
+        data={filterData.length > 0 ? filterData : branches}
         columns={columns}
         loading={loading}
         pagination={pagination}

@@ -6,6 +6,7 @@ const LeaseAccounts = lazy(() => import('./Accounts/pages'));
 const AddUpdateLeaseAccount = lazy(() => import('./Accounts/pages/AccountsPage'));
 const InstallmentsPage = lazy(() => import('./installments/pages/InstallmentsPage'));
 const OutstandPage = lazy(() => import('./outstand/pages'));
+const BankPage = lazy(() => import('./Bank/Pages/BankPage'));
 // const AccountDetails = lazy(() => import('./pages/AccountDetails'));
 
 export const leaseRoutes = [
@@ -54,6 +55,14 @@ export const leaseRoutes = [
     element: (
       <ProtectedRoute requiredPermissions={['outstand:read']}>
         <OutstandPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/lease/bank',
+    element: (
+      <ProtectedRoute requiredPermissions={['bank:read']}>
+        <BankPage />
       </ProtectedRoute>
     ),
   },

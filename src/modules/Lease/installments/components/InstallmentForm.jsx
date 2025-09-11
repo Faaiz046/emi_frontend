@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "../../../../shared/components/ui/Button";
 import Input from "../../../../shared/components/ui/Input";
+import { Select, CustomSelect } from "../../../../shared/components";
 import { Modal } from "../../../../shared/components/ui/Modal";
 import toast from "../../../../utils/toast";
 import { installmentApi } from "../services/installment";
 import { leaseAccountApi } from "../../services";
-
+import { Spinner } from "../../../../shared/components";
+import { userApi } from "../../../../services/user/api";
+import Toast from "../../../../utils/toast";
+import { RiLoader3Fill } from "react-icons/ri";
+import { apiClient } from "../../../../services/api-client/api";
+import { useQuery } from "@tanstack/react-query";
 const InstallmentForm = ({
   isOpen,
   onClose,
@@ -31,7 +37,7 @@ const InstallmentForm = ({
     outstanding: "",
     fine: "0",
     fine_type: "fixed", // fixed or percentage
-    recovery_officer: "",
+    officer: "",
     discount: "0",
     balance: "",
     sms_sent: false,
@@ -42,18 +48,19 @@ const InstallmentForm = ({
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [accountDetails, setAccountDetails] = useState(null);
-
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (installment) {
       setFormData({
         recv_no: installment.recv_no || "",
-        recv_date: installment.recv_date
+        install_date: installment.recv_date
           ? new Date(installment.recv_date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
         model: installment.model || "",
-        account_id: installment.account_id || accountId || "",
+        account_id: "",
         acc_no: installment.acc_no || "",
         account_date: installment.account_date
           ? new Date(installment.account_date).toISOString().split("T")[0]
@@ -82,7 +89,7 @@ const InstallmentForm = ({
     } else {
       setFormData({
         recv_no: "",
-        recv_date: new Date().toISOString().split("T")[0],
+        install_date: new Date().toISOString().split("T")[0],
         model: "",
         account_id: accountId || "",
         acc_no: "",
@@ -106,24 +113,31 @@ const InstallmentForm = ({
         payment_method: "cash",
         bank_account_id: "",
         notes: "",
+        officer_id: "",
       });
     }
   }, [installment, accountId, preBalance]);
 
   useEffect(() => {
-    loadUsers();
+    getUsers();
   }, []);
 
-  const loadUsers = async () => {
+  const getUsers = async () => {
+    // setUsersLoading(true);
     try {
-      // You can implement user loading logic here
-      // For now, using a mock array
-      setUsers([
-        { id: 1, name: "User 1" },
-        { id: 2, name: "User 2" },
-      ]);
+      const response = await userApi.getAll({ limit: 1000 });
+      if (response && response.data && Array.isArray(response.data)) {
+        const userOptions = response.data.map((user) => ({
+          value: user.id,
+          label: `${user.name}`,
+        }));
+        setUsers(userOptions);
+      }
     } catch (error) {
-      console.error("Failed to load users:", error);
+      console.error("Error loading users:", error);
+      Toast.error("Failed to load users");
+    } finally {
+      // setUsersLoading(false);
     }
   };
 
@@ -147,6 +161,7 @@ const InstallmentForm = ({
 
     try {
       setLoading(true);
+      setError(null);
       const res = await leaseAccountApi.accountDetails({
         acc_no: formData.acc_no,
       });
@@ -157,6 +172,7 @@ const InstallmentForm = ({
         // Update form fields with account details
         setFormData((prev) => ({
           ...prev,
+          account_id: accountData.id || "",
           customer_name: accountData.customer_name || "",
           son_of: accountData.son_of || "",
           account_date: accountData.process_date
@@ -170,36 +186,46 @@ const InstallmentForm = ({
           ).toString(),
           account_type: accountData.process_type || "",
           model: accountData.product?.name || "",
+          install_charge: accountData?.monthly_installment || 0,
+          recovery_officer:
+            accountData?.outStandPayment?.recovery_officer_id || "",
+          outstand: accountData?.outStandPayment?.outstand || 0,
+          officer_id: accountData?.outStandPayment?.recovery_officer_id || "",
         }));
         toast.success(`Account #${accountData.acc_no} loaded successfully`);
       }
     } catch (error) {
-      toast.error("Account not found or failed to load");
+      const errorMessage =
+        error?.response?.data?.message || "Account not found or failed to load";
+      setError(errorMessage);
+      toast.error(errorMessage);
       setAccountDetails(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateBalance = () => {
+  const calculateBalance = useCallback(() => {
     const preBalance = parseFloat(formData.pre_balance) || 0;
     const installCharge = parseFloat(formData.install_charge) || 0;
     const fine = parseFloat(formData.fine) || 0;
     const discount = parseFloat(formData.discount) || 0;
-
     const balance = preBalance + installCharge + fine - discount;
-    const outstanding = Math.max(0, balance);
-
     setFormData((prev) => ({
       ...prev,
       balance: balance.toString(),
-      outstanding: outstanding.toString(),
     }));
-  };
+  }, [
+    formData.pre_balance,
+    formData.install_charge,
+    formData.fine,
+    formData.discount,
+  ]);
 
   useEffect(() => {
     calculateBalance();
   }, [
+    calculateBalance,
     formData.pre_balance,
     formData.install_charge,
     formData.fine,
@@ -220,7 +246,8 @@ const InstallmentForm = ({
     }
 
     try {
-      setLoading(true);
+      setIsLoading(true);
+      setError(null);
 
       const payload = {
         ...formData,
@@ -241,6 +268,7 @@ const InstallmentForm = ({
 
       if (installment) {
         await installmentApi.update(installment.id, payload);
+        setIsLoading(false);
         toast.success("Installment updated successfully");
       } else {
         await installmentApi.create(payload);
@@ -250,7 +278,13 @@ const InstallmentForm = ({
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error(error?.message || "Failed to save installment");
+      setIsLoading(false);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to save installment";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -259,7 +293,7 @@ const InstallmentForm = ({
   const handleClose = () => {
     setFormData({
       recv_no: "",
-      recv_date: new Date().toISOString().split("T")[0],
+      install_date: new Date().toISOString().split("T")[0],
       model: "",
       account_id: accountId || "",
       account_date: "",
@@ -284,8 +318,24 @@ const InstallmentForm = ({
       notes: "",
     });
     setAccountDetails(null);
+    setError(null);
     onClose();
   };
+  useEffect(() => {
+    getUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const { data: banks_drd } = useQuery({
+    queryKey: ["banks_drd"],
+    queryFn: () => apiClient.get("/bank_accounts/drd").then((res) => res.data),
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
+    cacheTime: Infinity,
+  });
 
   return (
     <Modal
@@ -294,16 +344,51 @@ const InstallmentForm = ({
       title={installment ? "Edit Installment" : "Add New Installment"}
       size="xl"
       onSubmit={handleSubmit}
+      loading={isLoading}
     >
       <div className="space-y-3">
         {/* Account Lookup Section - Compact */}
+        {error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setError(null)}
+                    className="bg-red-100 px-3 py-1 rounded text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
         <div className="bg-blue-50 p-2 rounded border border-blue-200">
           <h3 className="text-sm font-semibold text-blue-800 mb-2">
             Account Lookup
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Account Number *"
+              label="Account Number"
               name="acc_no"
               value={formData.acc_no}
               onChange={handleInputChange}
@@ -314,231 +399,230 @@ const InstallmentForm = ({
             />
             <Input
               label="Receipt Date"
-              name="recv_date"
+              name="install_date"
               type="date"
-              value={formData.recv_date}
+              value={formData.install_date}
               onChange={handleInputChange}
               required
               className="text-sm"
             />
           </div>
-          {accountDetails && (
-            <div className="mt-2 p-1 bg-green-50 border border-green-200 rounded text-xs">
-              <span className="text-green-800">
-                <strong>Account #{accountDetails.acc_no}</strong> loaded
-                successfully
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Account Information Display - Very Compact */}
-        {accountDetails && (
-          <div className="bg-gray-50 p-2 rounded border border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-800 mb-2">
-              Account Information
-            </h3>
-            <div className="grid grid-cols-5 gap-1">
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Acc No</div>
-                <div className="text-xs font-semibold text-gray-900">
-                  {formData.acc_no || "N/A"}
+        {accountDetails && !loading ? (
+          <>
+            <div className="bg-gray-50 p-2 rounded border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                Account Information
+              </h3>
+              <div className="grid grid-cols-5 gap-1">
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Acc No</div>
+                  <div className="text-xs font-semibold text-gray-900">
+                    {formData.acc_no || "N/A"}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Customer</div>
-                <div className="text-xs font-semibold text-gray-900 truncate">
-                  {formData.customer_name || "N/A"}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Customer</div>
+                  <div className="text-xs font-semibold text-gray-900 truncate">
+                    {formData.customer_name || "N/A"}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">SO</div>
-                <div className="text-xs font-semibold text-gray-900 truncate">
-                  {formData.son_of || "N/A"}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">SO</div>
+                  <div className="text-xs font-semibold text-gray-900 truncate">
+                    {formData.son_of || "N/A"}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Product</div>
-                <div className="text-xs font-semibold text-gray-900 truncate">
-                  {formData.model || "N/A"}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Product</div>
+                  <div className="text-xs font-semibold text-gray-900 truncate">
+                    {formData.model || "N/A"}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Acc Date</div>
-                <div className="text-xs font-semibold text-gray-900">
-                  {formData.account_date || "N/A"}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Acc Date</div>
+                  <div className="text-xs font-semibold text-gray-900">
+                    {formData.account_date || "N/A"}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Advance</div>
-                <div className="text-xs font-semibold text-blue-600">
-                  ${parseFloat(formData.advance || 0).toLocaleString()}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Advance</div>
+                  <div className="text-xs font-semibold text-blue-600">
+                    ${parseFloat(formData.advance || 0).toLocaleString()}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Pre Balance</div>
-                <div className="text-xs font-semibold text-red-600">
-                  ${parseFloat(formData.pre_balance || 0).toLocaleString()}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Pre Balance</div>
+                  <div className="text-xs font-semibold text-red-600">
+                    ${parseFloat(formData.pre_balance || 0).toLocaleString()}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Type</div>
-                <div className="text-xs font-semibold text-gray-900">
-                  {formData.account_type || "N/A"}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Type</div>
+                  <div className="text-xs font-semibold text-gray-900">
+                    {formData.account_type || "N/A"}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Pending</div>
-                <div className="text-xs font-semibold text-orange-600">
-                  ${parseFloat(formData.pending || 0).toLocaleString()}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Pending</div>
+                  <div className="text-xs font-semibold text-orange-600">
+                    ${parseFloat(formData.pending || 0).toLocaleString()}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white p-1 rounded border border-gray-200 text-center">
-                <div className="text-xs text-gray-500 mb-1">Monthly</div>
-                <div className="text-xs font-semibold text-green-600">
-                  $
-                  {parseFloat(
-                    formData.monthly_installment || 0
-                  ).toLocaleString()}
+                <div className="bg-white p-1 rounded border border-gray-200 text-center">
+                  <div className="text-xs text-gray-500 mb-1">Monthly</div>
+                  <div className="text-xs font-semibold text-green-600">
+                    $
+                    {parseFloat(
+                      formData.monthly_installment || 0
+                    ).toLocaleString()}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Installment Details - Compact Grid */}
-        <div className="bg-yellow-50 p-2 rounded border border-yellow-200">
-          <h3 className="text-sm font-semibold text-yellow-800 mb-2">
-            Installment Details
-          </h3>
-          <div className="grid grid-cols-4 gap-2">
-            <Input
-              label="Install Charge *"
-              name="install_charge"
-              type="number"
-              step="0.01"
-              value={formData.install_charge}
-              onChange={handleInputChange}
-              placeholder="Charge"
-              required
-              size="md"
-            />
-            <Input
-              label="Fine Amount"
-              name="fine"
-              type="number"
-              step="0.01"
-              value={formData.fine}
-              onChange={handleInputChange}
-              placeholder="Fine"
-              size="md"
-            />
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fine Type
-              </label>
-              <select
-                name="fine_type"
-                value={formData.fine_type}
-                onChange={handleInputChange}
-                className="w-full px-2 py-2 h-9 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-              >
-                <option value="fixed">Fixed</option>
-                <option value="percentage">Percentage</option>
-              </select>
-            </div>
-            <Input
-              label="Discount"
-              name="discount"
-              type="number"
-              step="0.01"
-              value={formData.discount}
-              onChange={handleInputChange}
-              placeholder="Discount"
-              size="md"
-            />
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Payment Method
-              </label>
-              <select
-                name="payment_method"
-                value={formData.payment_method}
-                onChange={handleInputChange}
-                className="w-full px-2 py-2 h-9 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-              >
-                <option value="cash">Cash</option>
-                <option value="bank">Bank</option>
-                <option value="check">Check</option>
-                <option value="online">Online</option>
-              </select>
-            </div>
-            {formData.payment_method === "bank" && (
-              <Input
-                label="Bank Account"
-                name="bank_account_id"
-                type="number"
-                value={formData.bank_account_id}
-                onChange={handleInputChange}
-                placeholder="Bank account"
-                className="text-sm"
-                size="md"
-              />
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Officer
-              </label>
-              <select
-                name="recovery_officer"
-                value={formData.recovery_officer}
-                onChange={handleInputChange}
-                className="w-full px-2 py-2 h-9 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-              >
-                <option value="">Select Officer</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.name}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows={2}
-                className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
-                placeholder="Enter notes..."
-              />
-            </div>
-          </div>
-        </div>
+            {/* Installment Details - Compact Grid */}
+            <div className="bg-yellow-50 p-2 rounded border border-yellow-200">
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">
+                Installment Details
+              </h3>
+              <div className="grid grid-cols-4 gap-2">
+                <Input
+                  label="Install Charge"
+                  name="install_charge"
+                  type="number"
+                  step="1"
+                  value={formData.install_charge}
+                  onChange={handleInputChange}
+                  placeholder="Charge"
+                  required
+                  size="md"
+                />
+                <Input
+                  label="Fine Amount"
+                  name="fine"
+                  type="number"
+                  step="0.01"
+                  value={formData.fine}
+                  onChange={handleInputChange}
+                  placeholder="Fine"
+                  size="md"
+                />
+                <Select
+                  label="Fine Type"
+                  name="fine_type"
+                  value={formData.fine_type}
+                  onChange={(value) =>
+                    handleInputChange({ target: { name: "fine_type", value } })
+                  }
+                  options={[
+                    { value: "fixed", label: "Fixed" },
+                    { value: "percentage", label: "Percentage" },
+                  ]}
+                  size="md"
+                />
+                <Input
+                  label="Discount"
+                  name="discount"
+                  type="number"
+                  step="0.01"
+                  value={formData.discount}
+                  onChange={handleInputChange}
+                  placeholder="Discount"
+                  size="md"
+                />
+                <Select
+                  label="Payment Method"
+                  name="payment_method"
+                  value={formData.payment_method}
+                  onChange={(value) =>
+                    handleInputChange({
+                      target: { name: "payment_method", value },
+                    })
+                  }
+                  options={[
+                    { value: "cash", label: "Cash" },
+                    { value: "bank", label: "Bank" },
+                    { value: "check", label: "Check" },
+                    { value: "online", label: "Online" },
+                  ]}
+                  size="md"
+                />
 
-        {/* Calculated Results - Compact */}
-        <div className="bg-green-50 p-2 rounded border border-green-200">
-          <h3 className="text-sm font-semibold text-green-800 mb-2">
-            Calculated Results
-          </h3>
-          <div className="grid grid-cols-4 gap-2">
-            <div className="bg-white p-2 rounded border text-center">
-              <div className="text-xs text-green-700 mb-1">Outstanding</div>
-              <div className="text-sm font-semibold text-green-900">
-                ${parseFloat(formData.outstanding || 0).toLocaleString()}
+                {formData.payment_method === "bank" && (
+                  <Select
+                    label="Bank Account"
+                    name="bank_account"
+                    value={formData.account_type}
+                    onChange={(value) =>
+                      handleInputChange({
+                        target: { name: "payment_method", value },
+                      })
+                    }
+                    options={banks_drd.map((bank) => ({
+                      value: bank.id,
+                      label: bank.account_title,
+                    }))}
+                    size="md"
+                  />
+                )}
+                <Select
+                  label="Recovery Officer"
+                  placeholder="Select a Recovery Officer"
+                  options={users}
+                  value={formData.officer_id}
+                  onChange={(value) =>
+                    handleInputChange({
+                      target: { name: "officer_id", value },
+                    })
+                  }
+                  loading={loading}
+                  className="max-w-md"
+                />
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    rows={2}
+                    className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
+                    placeholder="Enter notes..."
+                  />
+                </div>
               </div>
             </div>
-            <div className="bg-white p-2 rounded border text-center">
-              <div className="text-xs text-green-700 mb-1">Balance</div>
-              <div className="text-sm font-semibold text-green-900">
-                ${parseFloat(formData.balance || 0).toLocaleString()}
+
+            {/* Calculated Results - Compact */}
+            <div className="bg-green-50 p-2 rounded border border-green-200">
+              <h3 className="text-sm font-semibold text-green-800 mb-2">
+                Calculated Results
+              </h3>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="bg-white p-2 rounded border text-center">
+                  <div className="text-xs text-green-700 mb-1">Outstanding</div>
+                  <div className="text-sm font-semibold text-green-900">
+                    ${parseFloat(formData?.outstand || 0).toLocaleString()}
+                  </div>
+                </div>
+                <div className="bg-white p-2 rounded border text-center">
+                  <div className="text-xs text-green-700 mb-1">Balance</div>
+                  <div className="text-sm font-semibold text-green-900">
+                    ${parseFloat(formData.balance || 0).toLocaleString()}
+                  </div>
+                </div>
               </div>
             </div>
+          </>
+        ) : loading ? (
+          <div className="flex items-center justify-center py-8 h-full min-h-[250px]">
+            <RiLoader3Fill className="animate-spin w-12 h-12 text-blue-600" />
           </div>
-        </div>
+        ) : null}
       </div>
     </Modal>
   );

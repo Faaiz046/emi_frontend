@@ -8,6 +8,7 @@ import LoginPage from './features/auth/pages/LoginPage';
 import AppRouter from './core/router';
 import { ToastContainer } from './shared/components';
 import './App.css';
+// import { Navigate } from 'react-router-dom';
 
 // Loading component for initialization
 const LoadingSpinner = () => (
@@ -24,7 +25,7 @@ const AppContent = () => {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isInitialized = useAppSelector(selectIsInitialized);
-
+  console.log(isAuthenticated,"Authenication")
   useEffect(() => {
     dispatch(initializeAuth());
   }, [dispatch]);
@@ -36,7 +37,8 @@ const AppContent = () => {
 
   return (
     <div className="App">
-      {isAuthenticated ? <AppRouter /> : <LoginPage />}
+      {/* {isAuthenticated ? <AppRouter /> : <LoginPage/>} */}
+      <AppRouter />
       <ToastContainer />
     </div>
   );

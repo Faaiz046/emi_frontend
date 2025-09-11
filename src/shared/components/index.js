@@ -1,9 +1,30 @@
 // Button
-export { Button, buttonVariants } from './ui/Button';
+export { Button, buttonVariants } from "./ui/Button";
 
 // Input
-export { default as Input } from './ui/Input';
-export { inputVariants, labelVariants } from './ui/inputVariants';
+export { default as Input } from "./ui/Input";
+export { inputVariants, labelVariants } from "./ui/inputVariants";
+
+// Select
+export { default as Select } from "./ui/Select";
+export {
+  selectVariants,
+  selectLabelVariants,
+  selectIconVariants,
+} from "./ui/selectVariants";
+
+// CustomSelect
+export { default as CustomSelect } from "./ui/CustomSelect";
+export {
+  customSelectVariants,
+  customSelectTriggerVariants,
+  customSelectContentVariants,
+  customSelectViewportVariants,
+  customSelectItemVariants,
+  customSelectLabelVariants,
+  customSelectSearchVariants,
+  customSelectIconVariants,
+} from "./ui/customSelectVariants";
 
 // Card
 export {
@@ -14,10 +35,10 @@ export {
   CardDescription,
   CardContent,
   cardVariants,
-} from './ui/Card';
+} from "./ui/Card";
 
 // Badge
-export { Badge, badgeVariants } from './ui/Badge';
+export { Badge, badgeVariants } from "./ui/Badge";
 
 // Modal
 export {
@@ -28,7 +49,7 @@ export {
   ModalFooter,
   modalVariants,
   modalContentVariants,
-} from './ui/Modal';
+} from "./ui/Modal";
 
 // Table
 export {
@@ -41,23 +62,20 @@ export {
   TableCell,
   TableCaption,
   tableVariants,
-} from './ui/Table';
+} from "./ui/Table";
 
 // DataTable
-export { DataTable } from './ui/DataTable';
+export { DataTable } from "./ui/DataTable";
 
 // Toast
-export { default as Toast } from './ui/Toast';
-export { default as ToastContainer } from './ui/ToastContainer';
+export { default as Toast } from "./ui/Toast";
+export { default as ToastContainer } from "./ui/ToastContainer";
 
 // Spinner
-export {
-  Spinner,
-  spinnerVariants,
-} from './ui/Spinner';
+export { Spinner, spinnerVariants } from "./ui/Spinner";
 
 // PageLoader
-export { default as PageLoader } from './ui/PageLoader';
+export { default as PageLoader } from "./ui/PageLoader";
 
 // ErrorBoundary
-export { default as ErrorBoundary } from './ui/ErrorBoundary'; 
+export { default as ErrorBoundary } from "./ui/ErrorBoundary";

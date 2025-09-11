@@ -27,7 +27,8 @@ import {
 } from "../../../shared/components/ui/Modal";
 import Toast from "../../../utils/toast";
 import { getFormattedDate } from "../../../utils/common";
-
+import PageHeader from "../../../shared/components/ui/PageHeader";
+import SelectInput from "../../../shared/components/ui/SelectInput";
 // Inject reducer at module level
 injectReducer("company", companyReducer);
 
@@ -40,6 +41,8 @@ const CompanyList = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -76,7 +79,7 @@ const CompanyList = () => {
         result = await dispatch(
           updateCompany({ id: editingCompany.id, data: formData })
         ).unwrap();
-        if (result && result.status === true) {
+        if (result) {
           Toast.success("Company updated successfully");
           setShowModal(false);
           setEditingCompany(null);
@@ -86,6 +89,7 @@ const CompanyList = () => {
         }
       } else {
         result = await dispatch(createCompany(formData)).unwrap();
+        console.log("🚀 ~ handleSubmit ~ result:", result);
         if (result && result.status === true) {
           Toast.success("Company created successfully");
           setShowModal(false);
@@ -98,7 +102,7 @@ const CompanyList = () => {
       console.log("🚀 ~ handleSubmit ~ result:", result);
     } catch (error) {
       console.error("Error saving company:", error);
-      Toast.error("Failed to save company");
+      Toast.error(error || "Failed to save company");
     }
   };
 
@@ -250,21 +254,54 @@ const CompanyList = () => {
     },
   ];
 
+  const handleFilter = (e) => {
+    const searchText = (e?.target?.value || "").trim().toLowerCase();
+    setSearchValue(searchText);
+   
+    if (searchText) {
+      const filtered = (companies || []).filter((company) => {
+        const search = searchText.toLowerCase();
+        return (
+          (company?.company_name || "").toLowerCase().includes(search) ||
+          (company?.email || "").toLowerCase().includes(search) ||
+          (company?.phone || "").toLowerCase().includes(search) ||
+          (company?.status || "").toLowerCase().includes(search) ||
+          (company?.subscription_plan || "").toLowerCase().includes(search)
+        );
+      });
+      setFilterData(filtered);
+    } else {
+      setFilterData([]);
+    }
+  };
+
+  useEffect(() => {
+    if (filters.search) {
+      handleFilter({ target: { value: filters.search } });
+    } else {
+      setFilterData([]);
+    }
+  }, [companies, filters.search]);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Company Management</h2>
         <Button onClick={() => setShowModal(true)}>Add Company</Button>
-      </div>
-
+      </div> */}
+      <PageHeader
+        title="Company Management"
+        buttonLabel="Add Company"
+        onClick={() => setShowModal(true)}
+      />
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Input
           placeholder="Search companies..."
-          value={filters.search}
-          onChange={(e) => dispatch(setFilters({ search: e.target.value }))}
+          value={searchValue}
+          onChange={handleFilter}
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.status}
           onChange={(e) => dispatch(setFilters({ status: e.target.value }))}
@@ -272,8 +309,21 @@ const CompanyList = () => {
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
-        </select>
-        <select
+        </select> */}
+        {/* <SelectInput
+          options={[
+            { label: "Active", value: "true" },
+            { label: "Inactive", value: "false" },
+          ]}
+          value={filters.is_active}
+          onChange={(value) =>
+            dispatch(setFilters({ is_active: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Status"
+        /> */}
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.subscription_plan}
           onChange={(e) =>
@@ -284,12 +334,25 @@ const CompanyList = () => {
           <option value="basic">Basic</option>
           <option value="premium">Premium</option>
           <option value="enterprise">Enterprise</option>
-        </select>
+        </select> */}
+        {/* <SelectInput
+          options={[{ label: "Basic", value: "basic" },
+            { label: "Premium", value: "premium" },
+            { label: "Enterprise", value: "enterprise" },
+          ]}
+          value={filters.subscription_plan}
+          onChange={(value) =>
+            dispatch(setFilters({ subscription_plan: value }))
+          }
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Plan"
+        /> */}
       </div>
 
       {/* Table */}
       <DataTable
-        data={companies}
+        data={filterData.length > 0 ? filterData : companies}
         columns={columns}
         loading={loading}
         pagination={pagination}
@@ -305,6 +368,8 @@ const CompanyList = () => {
           resetForm();
         }}
         size="xl"
+        loading={loading}
+        onSubmit={handleSubmit}
       >
         <ModalHeader>
           <ModalTitle>
@@ -526,7 +591,7 @@ const CompanyList = () => {
             </div>
           </form>
         </ModalContent>
-        <ModalFooter>
+        {/* <ModalFooter>
           <Button
             type="button"
             variant="outline"
@@ -547,7 +612,7 @@ const CompanyList = () => {
               ? "Update Company"
               : "Create Company"}
           </Button>
-        </ModalFooter>
+        </ModalFooter> */}
       </Modal>
     </div>
   );

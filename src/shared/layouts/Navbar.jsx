@@ -21,8 +21,10 @@ import {
   CogIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const navbar = useAppSelector(selectNavbar);
   const user = useAppSelector(selectUser);
@@ -68,6 +70,7 @@ const Navbar = () => {
       '/products': 'Product Management',
       '/analytics': 'Analytics',
       '/settings': 'Settings',
+      'lease/bank': 'Bank Accounts',
     };
     return pathTitles[currentPath] || 'Dashboard';
   };
@@ -75,6 +78,8 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await dispatch(logoutUser()).unwrap();
+      // window.location.href = '/login';
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     }

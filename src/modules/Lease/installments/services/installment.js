@@ -4,8 +4,8 @@ const BASE_URL = "/lease_installments";
 
 export const installmentApi = {
   // Get all installments with pagination and filters
-  list: async (params = {}) => {
-    const response = await apiClient.get(BASE_URL, { params });
+  list: async (data) => {
+    const response = await apiClient.post(BASE_URL, data);
     return response.data;
   },
 

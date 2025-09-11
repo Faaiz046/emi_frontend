@@ -17,7 +17,7 @@ const DashboardCard = ({ title, description, icon, color, stats, onClick }) => {
             <p className="text-sm text-gray-600 mb-3">
               {description}
             </p>
-            <p className="text-sm font-medium text-gray-500">
+            <p className="text-sm font-bold text-gray-700">
               {stats}
             </p>
           </div>

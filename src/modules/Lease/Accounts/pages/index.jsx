@@ -7,11 +7,18 @@ import toast from "../../../../utils/toast";
 import { getFormattedDate, formatCurrency } from "../../../../utils/common";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../../../shared/components/ui/Card";
-
+import SelectInput from "../../../../shared/components/ui/SelectInput";
+import DateSelect from "../../../../shared/components/ui/DateSelect";
+import { RiLoader3Fill } from "react-icons/ri";
 const AccountsListPage = () => {
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
+  const [filtersDate, setFiltersDate] = useState({
+    start_date: "",
+    end_date: "",
+  });
   const [pagination, setPagination] = useState({
     page: 0,
     limit: 10,
@@ -25,7 +32,6 @@ const AccountsListPage = () => {
   });
   const [viewMode, setViewMode] = useState("grid"); // 'table' or 'grid'
   const [selectedAccount, setSelectedAccount] = useState(null);
-  console.log("🚀 ~ AccountsListPage ~ selectedAccount:", selectedAccount);
 
   const fetchData = async () => {
     try {
@@ -36,6 +42,8 @@ const AccountsListPage = () => {
         search: filters.search,
         branch_id: filters.branch_id,
         status: filters.status,
+        start_date: filtersDate.start_date,
+        end_date: filtersDate.end_date,
       });
 
       // Expecting response like { data: [], pagination: { page, limit, total, totalPages } }
@@ -71,6 +79,7 @@ const AccountsListPage = () => {
     filters.search,
     filters.branch_id,
     filters.status,
+    filtersDate,
   ]);
 
   const columns = [
@@ -115,7 +124,7 @@ const AccountsListPage = () => {
             setFilters((prev) => ({ ...prev, branch_id: e.target.value }))
           }
         />
-        <select
+        {/* <select
           className="border rounded px-3 py-2"
           value={filters.status}
           onChange={(e) =>
@@ -125,7 +134,17 @@ const AccountsListPage = () => {
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
-        </select>
+        </select> */}
+        <SelectInput
+          options={[
+            { label: "Active", value: "active" },
+            { label: "Inactive", value: "inactive" },
+          ]}
+          value={filters.status}
+          valueProp="value"
+          labelProp="label"
+          placeholder="Select Status"
+        />
       </div>
 
       <DataTable
@@ -152,8 +171,8 @@ const AccountsListPage = () => {
 
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-center text-gray-500">
-                Loading accounts...
+              <div className="flex justify-center items-center h-full overflow-hidden">
+                <RiLoader3Fill className="animate-spin w-10 h-10 text-blue-600" />
               </div>
             ) : data.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
@@ -546,8 +565,15 @@ const AccountsListPage = () => {
                         Remaining Balance
                       </label>
                       <p className="text-rose-900 text-base font-medium mt-1">
-                        {selectedAccount.remaining_balance
-                          ? formatCurrency(selectedAccount.remaining_balance)
+                        {selectedAccount.installment_price &&
+                        selectedAccount?.advance
+                          ? formatCurrency(
+                              selectedAccount.installment_price -
+                                selectedAccount?.advance
+                            )
+                          : selectedAccount.installment_price &&
+                            !selectedAccount?.advance
+                          ? formatCurrency(selectedAccount.installment_price)
                           : "N/A"}
                       </p>
                     </div>
@@ -724,6 +750,27 @@ const AccountsListPage = () => {
           <Button onClick={() => navigate("/lease/accounts/create")}>
             Create Account
           </Button>
+          <div className="relative">
+            <DateSelect
+              value={filtersDate.start_date}
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+                if (selectedDate) {
+                  const isoDate = new Date(selectedDate).toISOString();
+                  setFiltersDate({
+                    start_date: isoDate,
+                    end_date: isoDate
+                  });
+                } else {
+                  setFiltersDate({
+                    start_date: "",
+                    end_date: ""
+                  });
+                }
+              }}
+             
+            />
+          </div>
         </div>
       </div>
 
