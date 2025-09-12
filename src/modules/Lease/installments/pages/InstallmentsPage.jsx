@@ -15,23 +15,35 @@ const InstallmentsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [filtersDate, setFiltersDate] = useState({
-    start_date: "",
-    end_date: "",
-  });
+  console.log("🚀 ~ InstallmentsPage ~ data:", data);
+  const currentDate = new Date();
 
+  // Helper function to format date as YYYY-MM-DD
+  const formatDateForStorage = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
-  const [pagination, setPagination] = useState({
-    page: 0,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
-  const [filters, setFilters] = useState({
-    search: "",
-    status: "",
-    payment_method: "",
-  });
+  const initialFilters = {
+    // start_date:
+    //   new Date(
+    //     currentDate.getFullYear(),
+    //     currentDate.getMonth(),
+    //     currentDate.getDate(),
+    //     0,
+    //     0,
+    //     0,
+    //     0
+    //   )
+    //     .toISOString()
+    //     .slice(0, 23) + "Z",
+    // end_date: new Date().toISOString().slice(0, 23) + "Z",
+    start_date: formatDateForStorage(currentDate),
+    end_date: formatDateForStorage(currentDate),
+  };
+  const [filtersDate, setFiltersDate] = useState(initialFilters);
   const [viewMode, setViewMode] = useState("grid"); // 'table' or 'grid'
   const [selectedInstallment, setSelectedInstallment] = useState(null);
   const [account, setAccount] = useState(null);
@@ -42,6 +54,7 @@ const InstallmentsPage = () => {
     if (account_id) {
       loadAccount();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account_id]);
 
   // Load all installments
@@ -49,15 +62,8 @@ const InstallmentsPage = () => {
     if (!account_id) {
       fetchData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    pagination.page,
-    pagination.limit,
-    filters.search,
-    filters.status,
-    filters.payment_method,
-    filtersDate,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersDate]);
 
   const loadAccount = async () => {
     try {
@@ -75,33 +81,30 @@ const InstallmentsPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await installmentApi.list({
-        page: pagination.page,
-        limit: pagination.limit,
-        search: filters.search,
-        status: filters.status,
-        payment_method: filters.payment_method,
-        start_date: filtersDate.start_date,
-        end_date: filtersDate.end_date,
-      });
 
-      const rows = res?.installments || [];
-      const pg = res?.pagination || {
-        page: res?.page ?? pagination.page,
-        limit: res?.limit ?? pagination.limit,
-        total: res?.total ?? rows.length,
-        totalPages:
-          res?.totalPages ??
-          Math.max(
-            1,
-            Math.ceil(
-              (res?.total ?? rows.length) / (res?.limit ?? pagination.limit)
-            )
-          ),
+      // Convert YYYY-MM-DD strings to ISO timestamps without timezone issues
+      const convertToISO = (dateString) => {
+        if (!dateString) return "";
+        const [year, month, day] = dateString.split("-").map(Number);
+        const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+        return {
+          start: startOfDay.toISOString(),
+          end: endOfDay.toISOString(),
+        };
       };
+
+      const startDateISO = convertToISO(filtersDate.start_date);
+      const endDateISO = convertToISO(filtersDate.end_date);
+
+      const res = await installmentApi.list({
+        start_date: startDateISO.start,
+        end_date: endDateISO.end,
+      });
+      const rows = res?.records || [];
       setData(rows);
-      setPagination(pg);
     } catch (error) {
+      console.log("🚀 ~ fetchData ~ error:", error);
       toast.error(error?.message || "Failed to fetch installments");
     } finally {
       setLoading(false);
@@ -138,13 +141,7 @@ const InstallmentsPage = () => {
     { key: "fine", label: "Fine", render: (v) => formatCurrency(v) },
     { key: "discount", label: "Discount", render: (v) => formatCurrency(v) },
     { key: "balance", label: "Balance", render: (v) => formatCurrency(v) },
-    {
-      key: "outstanding",
-      label: "Outstanding",
-      render: (v) => formatCurrency(v),
-    },
     { key: "payment_method", label: "Payment Method" },
-    { key: "sms_sent", label: "SMS Sent", render: (v) => (v ? "Yes" : "No") },
   ];
 
   const renderTableView = () => (
@@ -153,11 +150,7 @@ const InstallmentsPage = () => {
         data={data}
         columns={columns}
         loading={loading}
-        pagination={pagination}
-        onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
-        onLimitChange={(limit) =>
-          setPagination((prev) => ({ ...prev, limit, page: 0 }))
-        }
+        pagination={false}
         onRowClick={(installment) => setSelectedInstallment(installment)}
       />
     </Card>
@@ -202,14 +195,11 @@ const InstallmentsPage = () => {
                       #{installment.id}
                     </div>
                     <div className="text-sm text-gray-600 truncate">
-                      Account: {installment.account_id || "N/A"}
+                      Account: {installment?.advance?.acc_no || "N/A"}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {getFormattedDate(installment.install_date)} •{" "}
+                      {installment?.advance?.process?.customer_name} •{" "}
                       {installment.payment_method || "N/A"}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formatCurrency(installment.outstanding || 0)} outstanding
                     </div>
                   </div>
                 ))}
@@ -275,7 +265,8 @@ const InstallmentsPage = () => {
                           </div>
                         </div>
                         <p className="text-green-100 text-base font-medium">
-                          Account: {selectedInstallment.account_id || "N/A"}
+                          Account:{" "}
+                          {selectedInstallment?.advance?.acc_no || "N/A"}
                         </p>
                       </div>
                     </div>
@@ -292,11 +283,11 @@ const InstallmentsPage = () => {
                           {getFormattedDate(selectedInstallment.install_date)}
                         </span>
                       </div>
-                      <div className="px-3 py-1.5 bg-gradient-to-r from-white/15 to-white/5 rounded-lg border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      {/* <div className="px-3 py-1.5 bg-gradient-to-r from-white/15 to-white/5 rounded-lg border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                         <span className="text-white text-xs font-semibold">
                           {selectedInstallment.sms_sent ? "SMS Sent" : "No SMS"}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -438,14 +429,6 @@ const InstallmentsPage = () => {
                       </label>
                       <p className="text-purple-900 text-base font-medium mt-1">
                         {formatCurrency(selectedInstallment.discount || 0)}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-3 rounded-lg border border-amber-100 hover:border-amber-200 transition-colors">
-                      <label className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
-                        SMS Sent
-                      </label>
-                      <p className="text-amber-900 text-base font-medium mt-1">
-                        {selectedInstallment.sms_sent ? "Yes" : "No"}
                       </p>
                     </div>
                   </div>
@@ -698,18 +681,16 @@ const InstallmentsPage = () => {
               Grid View
             </button>
           </div>
-
-          {/* <DateSelect setFilter={setFiltersDate} /> */}
           <div className="relative">
             <DateSelect
               value={filtersDate.start_date}
               onChange={(e) => {
                 const selectedDate = e.target.value;
                 if (selectedDate) {
-                  const isoDate = new Date(selectedDate).toISOString();
+                  // Store the date in YYYY-MM-DD format to avoid timezone issues
                   setFiltersDate({
-                    start_date: isoDate,
-                    end_date: isoDate,
+                    start_date: selectedDate,
+                    end_date: selectedDate,
                   });
                 } else {
                   setFiltersDate({

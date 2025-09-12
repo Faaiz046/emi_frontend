@@ -22,7 +22,7 @@ const InstallmentForm = ({
 }) => {
   const [formData, setFormData] = useState({
     recv_no: "",
-    recv_date: new Date().toISOString().split("T")[0],
+    install_date: new Date().toISOString().split("T")[0],
     model: "",
     account_id: accountId || "",
     account_date: "",
@@ -56,8 +56,8 @@ const InstallmentForm = ({
     if (installment) {
       setFormData({
         recv_no: installment.recv_no || "",
-        install_date: installment.recv_date
-          ? new Date(installment.recv_date).toISOString().split("T")[0]
+        install_date: installment.install_date
+          ? new Date(installment.install_date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
         model: installment.model || "",
         account_id: "",
@@ -172,7 +172,7 @@ const InstallmentForm = ({
         // Update form fields with account details
         setFormData((prev) => ({
           ...prev,
-          account_id: accountData.id || "",
+          account_id: accountData.leaseAdvance?.id || "",
           customer_name: accountData.customer_name || "",
           son_of: accountData.son_of || "",
           account_date: accountData.process_date
@@ -208,19 +208,13 @@ const InstallmentForm = ({
   const calculateBalance = useCallback(() => {
     const preBalance = parseFloat(formData.pre_balance) || 0;
     const installCharge = parseFloat(formData.install_charge) || 0;
-    const fine = parseFloat(formData.fine) || 0;
     const discount = parseFloat(formData.discount) || 0;
-    const balance = preBalance + installCharge + fine - discount;
+    const balance = preBalance - installCharge - discount;
     setFormData((prev) => ({
       ...prev,
       balance: balance.toString(),
     }));
-  }, [
-    formData.pre_balance,
-    formData.install_charge,
-    formData.fine,
-    formData.discount,
-  ]);
+  }, [formData.pre_balance, formData.install_charge, formData.discount]);
 
   useEffect(() => {
     calculateBalance();
@@ -274,7 +268,7 @@ const InstallmentForm = ({
         await installmentApi.create(payload);
         toast.success("Installment created successfully");
       }
-
+      setIsLoading(false);
       onSuccess();
       onClose();
     } catch (error) {

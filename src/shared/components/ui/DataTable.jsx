@@ -112,8 +112,9 @@ const DataTable = ({
   data = [],
   columns = [],
   loading = false,
-  pagination = null,
+  pagination = true,
   onPageChange = null,
+  paginationModal = { page: 0, pageSize: 100 },
   className = "",
   emptyMessage = "No data available",
   rowSelection = null,
@@ -154,8 +155,9 @@ const DataTable = ({
           />
         </TableBody>
       </Table>
-
-      {/* <Pagination pagination={pagination} onPageChange={onPageChange} /> */}
+      {pagination ? (
+        <Pagination pagination={paginationModal} onPageChange={onPageChange} />
+      ) : null}
     </div>
   );
 };
