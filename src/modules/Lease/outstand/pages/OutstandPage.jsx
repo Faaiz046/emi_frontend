@@ -35,7 +35,7 @@ const OutstandPage = () => {
   const getUsers = async () => {
     setUsersLoading(true);
     try {
-      const response = await userApi.getAll({ limit: 1000 });
+      const response = await userApi.getAllUsersList({ limit: 1000 });
       if (response && response.data && Array.isArray(response.data)) {
         const userOptions = response.data.map((user) => ({
           value: user.id,
@@ -54,7 +54,7 @@ const OutstandPage = () => {
   const getOutstandData = async () => {
     setLoading(true);
     try {
-      const response = await outstandApi.list({
+      const response = await outstandApi.OutstandList({
         ...filters,
         page: pagination.current,
         limit: pagination.pageSize,
@@ -86,7 +86,7 @@ const OutstandPage = () => {
   const loadOutstandData = async () => {
     setLoading(true);
     try {
-      const response = await outstandApi.load({
+      const response = await outstandApi.loadOutstand({
         ...filters,
         page: pagination.current,
         limit: pagination.pageSize,
@@ -105,7 +105,7 @@ const OutstandPage = () => {
   const clearOutstandData = async () => {
     setLoading(true);
     try {
-      const response = await outstandApi.clear({ days: 0 });
+      const response = await outstandApi.clearOutstand({ days: 0 });
 
       if (response && response.data) {
         Toast.success("Outstand data cleared successfully");

@@ -36,7 +36,7 @@ const AccountsListPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await leaseAccountApi.list({
+      const res = await leaseAccountApi.leaseAccountList({
         page: pagination.page,
         limit: pagination.limit,
         search: filters.search,

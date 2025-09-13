@@ -125,7 +125,7 @@ const InstallmentForm = ({
   const getUsers = async () => {
     // setUsersLoading(true);
     try {
-      const response = await userApi.getAll({ limit: 1000 });
+      const response = await userApi.getAllUsersList({ limit: 1000 });
       if (response && response.data && Array.isArray(response.data)) {
         const userOptions = response.data.map((user) => ({
           value: user.id,
@@ -261,11 +261,11 @@ const InstallmentForm = ({
       };
 
       if (installment) {
-        await installmentApi.update(installment.id, payload);
+        await installmentApi.updateInstallment(installment.id, payload);
         setIsLoading(false);
         toast.success("Installment updated successfully");
       } else {
-        await installmentApi.create(payload);
+        await installmentApi.createInstallment(payload);
         toast.success("Installment created successfully");
       }
       setIsLoading(false);

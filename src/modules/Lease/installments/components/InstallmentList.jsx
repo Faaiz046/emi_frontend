@@ -71,7 +71,7 @@ const InstallmentList = ({ accountId, accountBalance = 0 }) => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this installment?")) {
       try {
-        await installmentApi.delete(id);
+        await installmentApi.deleteInstallment(id);
         toast.success("Installment deleted successfully");
         fetchInstallments();
       } catch (error) {
@@ -82,7 +82,7 @@ const InstallmentList = ({ accountId, accountBalance = 0 }) => {
 
   const handleMarkAsPaid = async (id) => {
     try {
-      await installmentApi.markAsPaid(id, { status: "paid" });
+      await installmentApi.markInstallmentAsPaid(id, { status: "paid" });
       toast.success("Installment marked as paid");
       fetchInstallments();
     } catch (error) {

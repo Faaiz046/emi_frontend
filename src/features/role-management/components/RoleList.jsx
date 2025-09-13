@@ -40,7 +40,7 @@ const RoleList = () => {
   const fetchRoles = async () => {
     try {
       setLoading(true);
-      const response = await roleApi.getAll();
+      const response = await roleApi.getAllRoles();
       
       if (response?.status) {
         setRoles(response.data.roles || response.data);
@@ -59,7 +59,7 @@ const RoleList = () => {
       setLoading(true);
       
       if (editingRole) {
-        const response = await roleApi.update(editingRole.id, formData);
+        const response = await roleApi.updateRole(editingRole.id, formData);
         if (response?.status) {
           // Update the role in the local state
           setRoles(prevRoles => 
@@ -72,7 +72,7 @@ const RoleList = () => {
           Toast.success('Role updated successfully');
         }
       } else {
-        const response = await roleApi.create(formData);
+        const response = await roleApi.createRole(formData);
         if (response?.status) {
           // Add the new role to the local state
           setRoles(prevRoles => [response.data, ...prevRoles]);
@@ -106,7 +106,7 @@ const RoleList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this role?')) {
       try {
-        const response = await roleApi.delete(id);
+        const response = await roleApi.deleteRole(id);
         if (response?.status) {
           // Remove the role from the local state
           setRoles(prevRoles => prevRoles.filter(role => role.id !== id));

@@ -70,7 +70,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productApi.getAll({
+      const response = await productApi.getAllProducts({
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
@@ -122,7 +122,7 @@ const ProductList = () => {
       setLoading(true);
 
       if (editingProduct) {
-        const response = await productApi.update(editingProduct.id, formData);
+        const response = await productApi.updateProduct(editingProduct.id, formData);
         if (response?.status) {
           // Update the product in the local state
           setProducts((prevProducts) =>
@@ -133,7 +133,7 @@ const ProductList = () => {
           Toast.success("Product updated successfully");
         }
       } else {
-        const response = await productApi.create(formData);
+        const response = await productApi.createProduct(formData);
         if (response?.status) {
           // Add the new product to the local state
           setProducts((prevProducts) => [response.data, ...prevProducts]);
@@ -189,7 +189,7 @@ const ProductList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await productApi.delete(id);
+        const response = await productApi.deleteProduct(id);
         if (response?.status) {
           // Remove the product from the local state
           setProducts((prevProducts) =>

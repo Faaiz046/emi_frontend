@@ -49,7 +49,7 @@ const BranchList = () => {
   const fetchBranches = async () => {
     try {
       setLoading(true);
-      const response = await branchApi.getAll({
+      const response = await branchApi.getAllBraches({
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
@@ -79,7 +79,7 @@ const BranchList = () => {
       setLoading(true);
 
       if (editingBranch) {
-        const response = await branchApi.update(editingBranch.id, formData);
+        const response = await branchApi.updateBrach(editingBranch.id, formData);
         if (response.status) {
           // Update the branch in the local state
           setBranches(prevBranches => 
@@ -92,7 +92,7 @@ const BranchList = () => {
           Toast.success("Branch updated successfully");
         }
       } else {
-        const response = await branchApi.create(formData);
+        const response = await branchApi.addNewBranch(formData);
         if (response.status) {
           // Add the new branch to the local state
           setBranches(prevBranches => [response.data, ...prevBranches]);
@@ -141,7 +141,7 @@ const BranchList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this branch?")) {
       try {
-        const response = await branchApi.delete(id);
+        const response = await branchApi.deleteBranch(id);
         if (response.status) {
           // Remove the branch from the local state
           setBranches(prevBranches => prevBranches.filter(branch => branch.id !== id));

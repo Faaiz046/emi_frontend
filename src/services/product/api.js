@@ -2,7 +2,7 @@ import { apiClient } from "../api-client/api";
 
 export const productApi = {
   // Get all products with pagination and filters
-  getAll: async (params = {}) => {
+  getAllProducts: async (params = {}) => {
     return apiClient.get(`/products`);
   },
 
@@ -12,7 +12,7 @@ export const productApi = {
   },
 
   // Create new product
-  create: async (productData) => {
+  createProduct: async (productData) => {
     const formData = new FormData();
 
     // Add text fields
@@ -57,7 +57,7 @@ export const productApi = {
   },
 
   // Update product
-  update: async (id, updateData) => {
+  updateProduct: async (id, updateData) => {
     const formData = new FormData();
 
     // Add text fields
@@ -102,7 +102,7 @@ export const productApi = {
   },
 
   // Delete product
-  delete: async (id) => {
+  deleteProduct: async (id) => {
     return apiClient.delete(`/products/${id}`);
   },
 

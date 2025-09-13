@@ -35,7 +35,7 @@ export const fetchCompanies = createAsyncThunk(
     try {
       // Try API first, fallback to mock
       try {
-        const response = await companyApi.getAll(params);
+        const response = await companyApi.getCompaniesList(params);
         if (response.status) {
           return response.data;
         }
@@ -87,11 +87,10 @@ export const fetchCompanies = createAsyncThunk(
 export const createCompany = createAsyncThunk(
   "company/createCompany",
   async (companyData, { rejectWithValue }) => {
-    console.log("🚀 ~ createCompany ~ companyData:", companyData);
     try {
       // Try API first, fallback to mock
       try {
-        const response = await companyApi.create(companyData);
+        const response = await companyApi.addNewCompany(companyData);
         if (response.status === true || response.status === undefined) {
           return response;
         } else {
@@ -123,7 +122,7 @@ export const updateCompany = createAsyncThunk(
     try {
       // Try API first, fallback to mock
       try {
-        const response = await companyApi.update(id, data);
+        const response = await companyApi.updateCompanyRecord(id, data);
         if (response.status) {
           return response.data;
         }
@@ -146,7 +145,7 @@ export const deleteCompany = createAsyncThunk(
     try {
       // Try API first, fallback to mock
       try {
-        const response = await companyApi.delete(id);
+        const response = await companyApi.deleteCompanyRecord(id);
         if (response.status) {
           return id;
         }

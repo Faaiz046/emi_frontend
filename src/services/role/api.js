@@ -2,8 +2,12 @@ import { apiClient } from "../api-client/api";
 
 export const roleApi = {
   // Get all roles with pagination and filters
-  getAll: async () => {
+  getAllRoles: async () => {
     return apiClient.get(`/roles`);
+  },
+
+  getRolesDrd: async () => {
+    return apiClient.get(`/roles/drd`);
   },
 
   // Get role by ID
@@ -12,17 +16,17 @@ export const roleApi = {
   },
 
   // Create new role
-  create: async (roleData) => {
+  createRole: async (roleData) => {
     return apiClient.post("/roles", roleData);
   },
 
   // Update role
-  update: async (id, updateData) => {
+  updateRole: async (id, updateData) => {
     return apiClient.put(`/roles/${id}`, updateData);
   },
 
   // Delete role
-  delete: async (id) => {
+  deleteRole: async (id) => {
     return apiClient.delete(`/roles/${id}`);
   },
 

@@ -615,10 +615,10 @@ const AccountsPage = () => {
 
       if (account_id) {
         // Check if id exists (meaning it's an edit)
-        await leaseAccountApi.update(account_id, payload);
+        await leaseAccountApi.updateLeaseAccount(account_id, payload);
         toast.success("Lease account updated successfully");
       } else {
-        const res = await leaseAccountApi.create(payload);
+        const res = await leaseAccountApi.createLeaseAccount(payload);
         toast.success("Lease account created successfully");
       }
 

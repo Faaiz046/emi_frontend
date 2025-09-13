@@ -2,7 +2,7 @@ import { apiClient } from '../api-client/api';
 
 export const companyApi = {
   // Get all companies with pagination and filters
-  getAll: async (params = {}) => {
+  getCompaniesList: async (params = {}) => {
     const { page = 0, limit = 10, search, status, subscription_plan, expired, expiring_days } = params;
 
     return apiClient.post(`/companies/list`, {
@@ -22,17 +22,17 @@ export const companyApi = {
   },
 
   // Create new company
-  create: async (companyData) => {
+  addNewCompany: async (companyData) => {
     return apiClient.post('/companies', companyData);
   },
 
   // Update company
-  update: async (id, updateData) => {
+  updateCompanyRecord: async (id, updateData) => {
     return apiClient.put(`/companies/${id}`, updateData);
   },
 
   // Delete company
-  delete: async (id) => {
+  deleteCompanyRecord: async (id) => {
     return apiClient.delete(`/companies/${id}`);
   },
 

@@ -48,7 +48,7 @@ const BrandList = () => {
   const fetchBrands = async () => {
     try {
       setLoading(true);
-      const response = await brandApi.getAll({
+      const response = await brandApi.getAllBrands({
         page: pagination.page,
         limit: pagination.limit,
         ...filters
@@ -78,7 +78,7 @@ const BrandList = () => {
       setLoading(true);
       
       if (editingBrand) {
-        const response = await brandApi.update(editingBrand.id, formData);
+        const response = await brandApi.updateBrand(editingBrand.id, formData);
         if (response?.status) {
           // Update the brand in the local state
           setBrands(prevBrands => 
@@ -91,7 +91,7 @@ const BrandList = () => {
           Toast.success('Brand updated successfully');
         }
       } else {
-        const response = await brandApi.create(formData);
+        const response = await brandApi.addBrand(formData);
         if (response?.status) {
           // Add the new brand to the local state
           setBrands(prevBrands => [response.data, ...prevBrands]);
@@ -135,7 +135,7 @@ const BrandList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this brand?')) {
       try {
-        const response = await brandApi.delete(id);
+        const response = await brandApi.deleteBrand(id);
         if (response?.status) {
           // Remove the brand from the local state
           setBrands(prevBrands => prevBrands.filter(brand => brand.id !== id));

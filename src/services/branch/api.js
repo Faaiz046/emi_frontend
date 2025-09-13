@@ -2,7 +2,7 @@ import { apiClient } from "../api-client/api";
 
 export const branchApi = {
   // Get all branches with pagination and filters
-  getAll: async (params = {}) => {
+  getAllBraches: async (params = {}) => {
     const {
       page = 0,
       limit = 100,
@@ -20,23 +20,27 @@ export const branchApi = {
     });
   },
 
+  getBranchesDrd: async () => {
+    return apiClient.get(`/branches/drd`);
+  },
+
   // Get branch by ID
   getById: async (id) => {
     return apiClient.get(`/branches/${id}`);
   },
 
   // Create new branch
-  create: async (branchData) => {
+  addNewBranch: async (branchData) => {
     return apiClient.post("/branches", branchData);
   },
 
   // Update branch
-  update: async (id, updateData) => {
+  updateBrach: async (id, updateData) => {
     return apiClient.put(`/branches/${id}`, updateData);
   },
 
   // Delete branch
-  delete: async (id) => {
+  deleteBranch: async (id) => {
     return apiClient.delete(`/branches/${id}`);
   },
 

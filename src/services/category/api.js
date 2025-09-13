@@ -2,7 +2,7 @@ import { apiClient } from "../api-client/api";
 
 export const categoryApi = {
   // Get all categories with pagination and filters
-  getAll: async () => {
+  getAllCategories: async () => {
     return apiClient.get(`/categories`);
   },
 
@@ -12,7 +12,7 @@ export const categoryApi = {
   },
 
   // Create new category
-  create: async (categoryData) => {
+  createCategory: async (categoryData) => {
     const formData = new FormData();
 
     // Add text fields
@@ -39,7 +39,7 @@ export const categoryApi = {
   },
 
   // Update category
-  update: async (id, updateData) => {
+  updateCategory: async (id, updateData) => {
     const formData = new FormData();
 
     // Add text fields
@@ -66,7 +66,7 @@ export const categoryApi = {
   },
 
   // Delete category
-  delete: async (id) => {
+  deleteCategory: async (id) => {
     return apiClient.delete(`/categories/${id}`);
   },
 
