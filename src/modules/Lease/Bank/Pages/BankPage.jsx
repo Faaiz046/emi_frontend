@@ -129,7 +129,10 @@ const BankPage = () => {
       <PageHeader
         title="Bank Accounts"
         buttonLabel="Add Bank Account"
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          setIsEdit(false);
+          setShowModal(true);
+        }}
       />
       <DataTable
         data={bankAccounts?.data}
@@ -142,7 +145,7 @@ const BankPage = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={() => {}}
-        title="Add Bank Account"
+        title={isEdit ? "Edit Bank Account" : "Add Bank Account"}
         size="xl"
         isEdit={isEdit}
         record={selectedRow}

@@ -4,8 +4,13 @@ const BASE_URL = "/lease_installments";
 
 export const installmentApi = {
   // Get all installments with pagination and filters
-  list: async (data) => {
+  installmentList: async (data) => {
     const response = await apiClient.post(`${BASE_URL}/list`, data);
+    return response.data;
+  },
+
+  getInstallmentsDetails: async (id) => {
+    const response = await apiClient.get(`${BASE_URL}/detail/${id}`);
     return response.data;
   },
 
@@ -24,25 +29,25 @@ export const installmentApi = {
   },
 
   // Create new installment
-  create: async (data) => {
+  createInstallment: async (data) => {
     const response = await apiClient.post(BASE_URL, data);
     return response.data;
   },
 
   // Update installment
-  update: async (id, data) => {
+  updateInstallment: async (id, data) => {
     const response = await apiClient.put(`${BASE_URL}/${id}`, data);
     return response.data;
   },
 
   // Delete installment
-  delete: async (id) => {
+  deleteInstallment: async (id) => {
     const response = await apiClient.delete(`${BASE_URL}/${id}`);
     return response.data;
   },
 
   // Mark installment as paid
-  markAsPaid: async (id, data) => {
+  markInstallmentAsPaid: async (id, data) => {
     const response = await apiClient.patch(`${BASE_URL}/${id}/pay`, data);
     return response.data;
   },

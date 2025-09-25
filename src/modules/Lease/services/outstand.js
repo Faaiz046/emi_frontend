@@ -4,17 +4,17 @@ const BASE_URL = "/outstanding_payments";
 
 export const outstandApi = {
   // Get list of outstanding accounts
-  load: async (params = {}) => {
+  loadOutstand: async (params = {}) => {
     const response = await apiClient.post(`${BASE_URL}/calculate`, params);
     return response.data;
   },
 
   // Get outstanding accounts by account number
-  list: async (params = {}) => {
+  OutstandList: async (params = {}) => {
     const response = await apiClient.post(`${BASE_URL}`, params);
     return response;
   },
-  clear: async (data) => {
+  clearOutstand: async (data) => {
     const response = await apiClient.post(`${BASE_URL}/cleanup`, data);
     return response;
   },

@@ -51,7 +51,7 @@ const CategoryList = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await categoryApi.getAll({
+      const response = await categoryApi.getAllCategories({
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
@@ -81,7 +81,7 @@ const CategoryList = () => {
       setLoading(true);
 
       if (editingCategory) {
-        const response = await categoryApi.update(editingCategory.id, formData);
+        const response = await categoryApi.updateCategory(editingCategory.id, formData);
         if (response?.status) {
           // Update the category in the local state
           setCategories((prevCategories) =>
@@ -94,8 +94,8 @@ const CategoryList = () => {
           Toast.error(response?.message || "Failed to update category");
         }
       } else {
-        const response = await categoryApi.create(formData);
-        if (response?.status) {
+          const response = await categoryApi.createCategory(formData);
+          if (response?.status) {
           // Add the new category to the local state
           setCategories((prevCategories) => [response.data, ...prevCategories]);
           // Update pagination if needed
@@ -136,7 +136,7 @@ const CategoryList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        const response = await categoryApi.delete(id);
+        const response = await categoryApi.deleteCategory(id);
         if (response?.status) {
           // Remove the category from the local state
           setCategories((prevCategories) =>

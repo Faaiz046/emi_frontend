@@ -2,7 +2,7 @@ import { apiClient } from "../api-client/api";
 
 export const brandApi = {
   // Get all brands with pagination and filters
-  getAll: async (params = {}) => {
+  getAllBrands: async (params = {}) => {
     return apiClient.get(`/brands`);
   },
 
@@ -12,7 +12,7 @@ export const brandApi = {
   },
 
   // Create new brand
-  create: async (brandData) => {
+  addBrand: async (brandData) => {
     const formData = new FormData();
     Object.keys(brandData || {}).forEach((key) => {
       if (key === "logo") return; // handle below
@@ -36,7 +36,7 @@ export const brandApi = {
   },
 
   // Update brand
-  update: async (id, updateData) => {
+  updateBrand: async (id, updateData) => {
     const formData = new FormData();
     Object.keys(updateData || {}).forEach((key) => {
       if (key === "logo") return; // handle below
@@ -60,7 +60,7 @@ export const brandApi = {
   },
 
   // Delete brand
-  delete: async (id) => {
+  deleteBrand: async (id) => {
     return apiClient.delete(`/brands/${id}`);
   },
 

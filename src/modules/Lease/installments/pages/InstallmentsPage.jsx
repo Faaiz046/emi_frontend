@@ -7,7 +7,11 @@ import { InstallmentList, InstallmentForm } from "../components";
 import { installmentApi } from "../services/installment";
 import { leaseAccountApi } from "../../services";
 import toast from "../../../../utils/toast";
-import { getFormattedDate, formatCurrency } from "../../../../utils/common";
+import {
+  getFormattedDate,
+  formatCurrency,
+  getDate,
+} from "../../../../utils/common";
 import { RiLoader3Fill } from "react-icons/ri";
 import DateSelect from "../../../../shared/components/ui/DateSelect";
 const InstallmentsPage = () => {
@@ -15,7 +19,7 @@ const InstallmentsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-  console.log("🚀 ~ InstallmentsPage ~ data:", data);
+  const [installmentDetails, setInstallmentDetails] = useState([]);
   const currentDate = new Date();
 
   // Helper function to format date as YYYY-MM-DD
@@ -68,7 +72,7 @@ const InstallmentsPage = () => {
   const loadAccount = async () => {
     try {
       setLoading(true);
-      const res = await leaseAccountApi.getById({ id: account_id });
+      const res = await leaseAccountApi.getLeaseAccountById({ id: account_id });
       const accountData = res?.data || res;
       setAccount(accountData);
     } catch (error) {
@@ -97,7 +101,7 @@ const InstallmentsPage = () => {
       const startDateISO = convertToISO(filtersDate.start_date);
       const endDateISO = convertToISO(filtersDate.end_date);
 
-      const res = await installmentApi.list({
+      const res = await installmentApi.installmentList({
         start_date: startDateISO.start,
         end_date: endDateISO.end,
       });
@@ -108,6 +112,28 @@ const InstallmentsPage = () => {
       toast.error(error?.message || "Failed to fetch installments");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getInstallmentsDetails = async (id) => {
+    try {
+      const res = await installmentApi.getInstallmentsDetails(id);
+      const accountData = res?.data || res;
+      setInstallmentDetails([
+        {
+          install_date: accountData.install_date,
+          recv_no: accountData.recv_no,
+          pre_balance: accountData.pre_balance,
+          install_charge: accountData.install_charge,
+          balance: accountData.balance,
+          payment_method: accountData.payment_method,
+          fine: accountData.fine,
+          fine_type: accountData.fine_type,
+          discount: accountData.discount,
+        },
+      ]);
+    } catch (error) {
+      toast.error(error?.message || "Failed to fetch installments details");
     }
   };
 
@@ -143,6 +169,44 @@ const InstallmentsPage = () => {
     { key: "balance", label: "Balance", render: (v) => formatCurrency(v) },
     { key: "payment_method", label: "Payment Method" },
   ];
+
+  const columns2 = [
+    {
+      key: "install_date",
+      label: "Install Date",
+      render: (v) => getFormattedDate(v),
+    },
+    {
+      key: "recv_no",
+      label: "Recv No",
+      render: (v) => v,
+    },
+    {
+      key: "pre_balance",
+      label: "Pre Balance",
+      render: (v) => formatCurrency(v),
+    },
+    {
+      key: "install_charge",
+      label: "Install Charge",
+      render: (v) => formatCurrency(v),
+    },
+    { key: "balance", label: "Balance", render: (v) => formatCurrency(v) },
+    { key: "recovery", label: "Recovery", render: (v) => formatCurrency(v) },
+    { key: "fine", label: "Fine", render: (v) => formatCurrency(v) },
+    { key: "fine_type", label: "Fine Type" },
+  ];
+
+  const DetailItem = ({ label, value, className }) => (
+    <div className={`p-4 space-x-3 bg-white   flex-1 ${className}`}>
+      <span className="text-sm font-bold text-gray-900 tracking-wide uppercase">
+        {label}
+      </span>
+      <span className="text-sm font-medium text-gray-700 mt-1">
+        {value ?? "N/A"}
+      </span>
+    </div>
+  );
 
   const renderTableView = () => (
     <Card>
@@ -189,7 +253,10 @@ const InstallmentsPage = () => {
                         ? "bg-blue-50 border-r-2 border-blue-500"
                         : ""
                     }`}
-                    onClick={() => setSelectedInstallment(installment)}
+                    onClick={() => {
+                      setSelectedInstallment(installment);
+                      getInstallmentsDetails(installment.id);
+                    }}
                   >
                     <div className="font-medium text-gray-900">
                       #{installment.id}
@@ -211,340 +278,181 @@ const InstallmentsPage = () => {
 
       {/* Right Side - Installment Details */}
       <div className="lg:col-span-3">
-        {selectedInstallment ? (
-          <Card className="overflow-hidden">
-            {/* Header with enhanced gradient background */}
-            <div className="bg-gradient-to-br from-green-600 via-emerald-700 to-teal-800 p-4 text-white relative overflow-hidden shadow-2xl">
-              {/* Enhanced decorative elements */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/20 to-white/5 rounded-full -translate-y-12 translate-x-12 blur-sm"></div>
-              <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-white/15 to-white/5 rounded-full translate-y-8 -translate-x-8 blur-sm"></div>
-              <div className="absolute top-1/2 left-1/4 w-12 h-12 bg-white/10 rounded-full blur-md animate-pulse"></div>
-
-              {/* Subtle pattern overlay */}
-              <div className="absolute inset-0 opacity-30">
-                <div
-                  className="w-full h-full"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px)`,
-                    backgroundSize: "60px 60px",
-                  }}
-                ></div>
-              </div>
-
-              <div className="relative z-10">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    {/* Main header content */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-gradient-to-br from-white/25 to-white/15 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg">
-                        <svg
-                          className="w-6 h-6 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h2 className="text-3xl font-black bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
-                            #{selectedInstallment.id}
-                          </h2>
-                          <div className="px-2 py-0.5 bg-green-500/20 border border-green-400/30 rounded-full">
-                            <span className="text-green-300 text-xs font-semibold uppercase tracking-wider">
-                              {selectedInstallment.outstanding > 0
-                                ? "Outstanding"
-                                : "Paid"}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-green-100 text-base font-medium">
-                          Account:{" "}
+        <div>
+          {selectedInstallment ? (
+            <Card>
+              {/* Header */}
+              <div className="bg-white p-1 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      Installment #
+                      {selectedInstallment.recv_no || selectedInstallment.id}
+                    </h2>
+                    <div className="flex items-center gap-4 text-base text-gray-600 mb-2 ">
+                      <span className="font-bold">
+                        {selectedInstallment?.advance?.process?.customer_name ||
+                          "N/A"}
+                      </span>
+                      <span className="space-x-1">
+                        <span className="font-bold">Account:</span>
+                        <span>
                           {selectedInstallment?.advance?.acc_no || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Enhanced badges */}
-                    <div className="flex items-center gap-2 mt-3">
-                      <div className="px-3 py-1.5 bg-gradient-to-r from-white/25 to-white/15 rounded-lg border border-white/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <span className="text-white text-xs font-semibold">
-                          {selectedInstallment.payment_method || "N/A"}
                         </span>
-                      </div>
-                      <div className="px-3 py-1.5 bg-gradient-to-r from-white/20 to-white/10 rounded-lg border border-white/15 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <span className="text-white text-xs font-semibold">
-                          {getFormattedDate(selectedInstallment.install_date)}
+                      </span>
+                      <span className="space-x-1">
+                        <span className="font-bold">Date:</span>
+                        <span>
+                          {" "}
+                          {getDate(selectedInstallment.install_date)}
                         </span>
-                      </div>
-                      {/* <div className="px-3 py-1.5 bg-gradient-to-r from-white/15 to-white/5 rounded-lg border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <span className="text-white text-xs font-semibold">
-                          {selectedInstallment.sms_sent ? "SMS Sent" : "No SMS"}
-                        </span>
-                      </div> */}
-                    </div>
-                  </div>
-
-                  {/* Enhanced Action Buttons */}
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() =>
-                          navigate(
-                            `/lease/accounts/${selectedInstallment.account_id}/installments`
-                          )
-                        }
-                        className="bg-gradient-to-r from-blue-500 to-indigo-600 !text-white hover:from-indigo-600 hover:to-blue-500 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 font-semibold px-3 py-2 rounded-lg text-sm"
+                      </span>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedInstallment.outstanding > 0
+                            ? "bg-red-100 text-red-700  text"
+                            : "bg-green-100 text-green-700 "
+                        }`}
                       >
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        View Account
-                      </Button>
-                    </div>
-
-                    {/* Quick stats */}
-                    <div className="text-right">
-                      <div className="text-xs text-green-200 uppercase tracking-wider mb-0.5">
-                        Installment Status
-                      </div>
-                      <div className="text-xs text-white font-medium">
                         {selectedInstallment.outstanding > 0
                           ? "Outstanding"
-                          : "Fully Paid"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Financial Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1.5 bg-green-100 rounded-lg">
-                      <svg
-                        className="w-4 h-4 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-800">
-                      Financial Details
-                    </h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100 hover:border-green-200 transition-colors">
-                      <label className="text-xs font-semibold text-green-700 uppercase tracking-wide">
-                        Previous Balance
-                      </label>
-                      <p className="text-green-900 text-base font-medium mt-1">
-                        {formatCurrency(selectedInstallment.pre_balance || 0)}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100 hover:border-blue-200 transition-colors">
-                      <label className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-                        Installment Charge
-                      </label>
-                      <p className="text-blue-900 text-base font-medium mt-1">
-                        {formatCurrency(
-                          selectedInstallment.install_charge || 0
-                        )}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-r from-red-50 to-pink-50 p-3 rounded-lg border border-red-100 hover:border-red-200 transition-colors">
-                      <label className="text-xs font-semibold text-red-700 uppercase tracking-wide">
-                        Fine Amount
-                      </label>
-                      <p className="text-red-900 text-base font-medium mt-1">
-                        {formatCurrency(selectedInstallment.fine || 0)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1.5 bg-indigo-100 rounded-lg">
-                      <svg
-                        className="w-4 h-4 text-indigo-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 10h18M3 14h18M3 18h18M3 6h18"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-800">
-                      Payment Details
-                    </h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-3 rounded-lg border border-indigo-100 hover:border-indigo-200 transition-colors">
-                      <label className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
-                        Payment Method
-                      </label>
-                      <p className="text-indigo-900 text-base font-medium mt-1">
+                          : "Paid"}
+                      </span>
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-900">
                         {selectedInstallment.payment_method || "N/A"}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border border-purple-100 hover:border-purple-200 transition-colors">
-                      <label className="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                        Discount
-                      </label>
-                      <p className="text-purple-900 text-base font-medium mt-1">
-                        {formatCurrency(selectedInstallment.discount || 0)}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                </div>
-
-                {/* Summary Information */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1.5 bg-rose-100 rounded-lg">
-                      <svg
-                        className="w-4 h-4 text-rose-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-800">Summary</h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-3 rounded-lg border border-rose-100 hover:border-rose-200 transition-colors">
-                      <label className="text-xs font-semibold text-rose-700 uppercase tracking-wide">
-                        Total Balance
-                      </label>
-                      <p className="text-rose-900 text-base font-medium mt-1">
-                        {formatCurrency(selectedInstallment.balance || 0)}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-3 rounded-lg border border-rose-100 hover:border-rose-200 transition-colors">
-                      <label className="text-xs font-semibold text-rose-700 uppercase tracking-wide">
-                        Outstanding Amount
-                      </label>
-                      <p className="text-rose-900 text-base font-medium mt-1">
-                        {formatCurrency(selectedInstallment.outstanding || 0)}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-3 rounded-lg border border-rose-100 hover:border-rose-200 transition-colors">
-                      <label className="text-xs font-semibold text-rose-700 uppercase tracking-wide">
-                        Fine Type
-                      </label>
-                      <p className="text-rose-900 text-base font-medium mt-1">
-                        {selectedInstallment.fine_type || "Fixed"}
-                      </p>
-                    </div>
-                  </div>
+                  <Button
+                    onClick={() =>
+                      navigate(
+                        `/lease/accounts/${selectedInstallment.account_id}/installments`
+                      )
+                    }
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    View Account
+                  </Button>
                 </div>
               </div>
 
-              {/* Notes Section */}
-              {selectedInstallment.notes && (
-                <div className="mt-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1.5 bg-gray-100 rounded-lg">
-                      <svg
-                        className="w-4 h-4 text-gray-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-800">Notes</h3>
-                  </div>
+              <div className="grid grid-cols-4">
+                <DetailItem
+                  label="Model"
+                  value={selectedInstallment.advance?.process?.product?.name}
+                />
+                <DetailItem
+                  label="Brand"
+                  value={
+                    selectedInstallment.advance?.process?.product?.brand?.name
+                  }
+                />
+                <DetailItem
+                  label="Product"
+                  value={
+                    selectedInstallment.advance?.process?.product?.category
+                      ?.name
+                  }
+                />
+                <DetailItem
+                  label="Officer"
+                  value={selectedInstallment.officer?.name ?? "Not Assigned"}
+                />
 
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p className="text-gray-700">{selectedInstallment.notes}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </Card>
-        ) : (
-          <Card className="overflow-hidden">
-            <div className="p-12 text-center bg-gradient-to-br from-gray-50 to-gray-100">
-              <div className="bg-gradient-to-br from-green-100 to-emerald-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-12 h-12 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  />
-                </svg>
+                <DetailItem
+                  label="Pre Balance"
+                  value={selectedInstallment.pre_balance}
+                  className="font-bold "
+                />
+                <DetailItem
+                  label="Install Charge"
+                  value={selectedInstallment.install_charge}
+                  className="font-bold"
+                />
+                <DetailItem label="Fine" value={selectedInstallment.fine} />
+                <DetailItem
+                  label="Fine Type"
+                  value={selectedInstallment.fine_type}
+                />
+                <DetailItem
+                  label="Discount"
+                  value={selectedInstallment.discount}
+                />
+                <DetailItem
+                  label="Balance"
+                  value={formatCurrency(selectedInstallment.balance || 0)}
+                  className="font-bold"
+                />
+
+                <DetailItem
+                  label="Account No"
+                  value={selectedInstallment.advance?.acc_no}
+                  className="font-bold"
+                />
+                <DetailItem
+                  label="Account Date"
+                  value={getDate(selectedInstallment.advance?.account_date)}
+                />
+                <DetailItem
+                  label="Process Type"
+                  value={selectedInstallment.advance?.process_type}
+                />
+                <DetailItem
+                  label="Total Received"
+                  value={selectedInstallment.advance?.total_received}
+                  className="font-bold"
+                />
+                <DetailItem
+                  label="Pending Advance"
+                  value={selectedInstallment.advance?.pending_advance}
+                  className="font-bold"
+                />
+                <DetailItem
+                  label="Remaining Balance"
+                  value={selectedInstallment.advance?.remaining_balance}
+                  className="font-bold"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Select an Installment
-              </h3>
-              <p className="text-gray-600 text-lg">
-                Choose an installment from the list to view its details
-              </p>
-              <div className="mt-6 p-4 bg-white rounded-xl border border-gray-200 inline-block">
-                <p className="text-sm text-gray-500">
-                  👈 Click on any installment in the sidebar
+            </Card>
+          ) : (
+            <Card>
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-8 h-8 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                  Select an Installment
+                </h3>
+                <p className="text-gray-600">
+                  Choose an installment from the list to view its details
                 </p>
               </div>
-            </div>
-          </Card>
-        )}
+            </Card>
+          )}
+        </div>
+        {installmentDetails.length > 0 ? (
+          <div className="mt-3">
+            <DataTable
+              data={installmentDetails}
+              columns={columns2}
+              loading={loading}
+              pagination={false}
+              onRowClick={(installment) => setSelectedInstallment(installment)}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

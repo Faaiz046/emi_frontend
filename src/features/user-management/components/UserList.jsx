@@ -73,15 +73,15 @@ const UserList = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
-    fetchRoles();
+    fetchUsersList();
+    fetchUserRoles();
     fetchBranches();
-  }, [pagination.page, filters]);
+  }, [filters]);
 
-  const fetchUsers = async () => {
+  const fetchUsersList = async () => {
     try {
       setLoading(true);
-      const response = await userApi.getAll({
+      const response = await userApi.getAllUsersList({
         page: pagination.page,
         limit: pagination.limit,
         ...filters,
@@ -105,9 +105,9 @@ const UserList = () => {
     }
   };
 
-  const fetchRoles = async () => {
+  const fetchUserRoles = async () => {
     try {
-      const response = await roleApi.getActive();
+      const response = await roleApi.getRolesDrd();
       if (response?.status) {
         setRoles(response.data);
       }
@@ -118,7 +118,7 @@ const UserList = () => {
 
   const fetchBranches = async () => {
     try {
-      const response = await branchApi.getActive();
+      const response = await branchApi.getBranchesDrd();
       if (response?.status) {
         setBranches(response.data);
       }

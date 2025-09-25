@@ -2,7 +2,7 @@ import { apiClient } from '../api-client/api';
 
 export const userApi = {
   // Get all users with pagination and filters
-  getAll: async (params = {}) => {
+  getAllUsersList: async (params = {}) => {
     const { page = 0, limit = 10, search, role_id, branch_ids, primary_branch_id, is_active, is_verified, department, position } = params;
     const queryParams = new URLSearchParams();
     

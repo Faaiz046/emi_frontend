@@ -197,7 +197,7 @@ const AccountsPage = () => {
 
   const loadUsers = async () => {
     try {
-      const res = await userApi.getAll({ limit: 1000 });
+      const res = await userApi.getAllUsersList({ limit: 1000 });
       const list = res?.data || res || [];
       setUsers(Array.isArray(list) ? list : []);
     } catch (error) {
@@ -208,7 +208,7 @@ const AccountsPage = () => {
   const loadAccountData = async (id) => {
     try {
       setLoading(true);
-      const res = await leaseAccountApi.getById({ id });
+      const res = await leaseAccountApi.getLeaseAccountById({ id });
       const accountData = res?.data || res;
 
       if (accountData) {
@@ -526,10 +526,10 @@ const AccountsPage = () => {
       };
 
       if (account_id) {
-        await leaseAccountApi.update(account_id, payload);
+        await leaseAccountApi.updateLeaseAccount(account_id, payload);
         toast.success("Lease account updated successfully");
       } else {
-        await leaseAccountApi.create(payload);
+        await leaseAccountApi.createLeaseAccount(payload);
         toast.success("Lease account created successfully");
       }
 

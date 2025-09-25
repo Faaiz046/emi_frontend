@@ -12,7 +12,7 @@ const appendFile = (formData, fieldName, fileOrFiles) => {
 
 export const leaseAccountApi = {
   // List Lease Accounts with pagination and filters
-  list: async (params = {}) => {
+  leaseAccountList: async (params = {}) => {
     const { page = 0, limit = 10, search, branch_id, status, start_date, end_date } = params;
     return apiClient.post("/lease_accounts/list", {
       page,
@@ -26,7 +26,7 @@ export const leaseAccountApi = {
   },
 
   // Get Lease Account by ID
-  getById: async (params = {}) => {
+  getLeaseAccountById: async (params = {}) => {
     return apiClient.get(`/lease_accounts/${params?.id || null}`, {
       params: { acc_no: params?.acc_no },
     });
@@ -40,7 +40,7 @@ export const leaseAccountApi = {
   },
 
   // Create Lease Account (processing, customer, advance + images)
-  create: async (payload = {}) => {
+  createLeaseAccount: async (payload = {}) => {
     const { images = {}, ...formFields } = payload;
 
     // // Clean up the form data - remove fields that shouldn't be sent
@@ -86,7 +86,7 @@ export const leaseAccountApi = {
   },
 
   // Update Lease Account
-  update: async (id, payload = {}) => {
+  updateLeaseAccount: async (id, payload = {}) => {
     const { images = {}, ...formFields } = payload;
 
     // Clean up the form data - remove fields that shouldn't be sent
