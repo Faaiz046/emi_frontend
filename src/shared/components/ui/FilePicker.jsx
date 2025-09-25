@@ -145,7 +145,7 @@ const FilePicker = ({
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        onClick={() => inputRef.current && inputRef.current.click()}
+        // onClick={() => inputRef.current && inputRef.current.click()}
         role="button"
         tabIndex={0}
       >

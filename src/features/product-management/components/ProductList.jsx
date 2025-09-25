@@ -96,7 +96,7 @@ const ProductList = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await categoryApi.getAll();
+      const response = await categoryApi.getAllCategories();
       if (response?.status) {
         setCategories(response.data);
       }
@@ -107,7 +107,7 @@ const ProductList = () => {
 
   const fetchBrands = async () => {
     try {
-      const response = await brandApi.getAll();
+      const response = await brandApi.getAllBrands();
       if (response?.status) {
         setBrands(response.data);
       }
@@ -425,7 +425,7 @@ const ProductList = () => {
         }}
         onSubmit={handleSubmit}
         title={editingProduct ? "Edit Product" : "Add New Product"}
-        size="6xl"
+        size="xl"
         loading={loading}
       >
         <form id="product-form" className="space-y-6" onSubmit={handleSubmit}>

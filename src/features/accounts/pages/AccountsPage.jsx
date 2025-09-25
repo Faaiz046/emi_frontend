@@ -180,16 +180,18 @@ const AccountsPage = () => {
         const list = res?.data || res || [];
         setProducts(Array.isArray(list) ? list : []);
       } catch (error) {
+        console.log("🚀 ~ loadProducts ~ error:", error)
         toast.error(error?.message || "Failed to load products");
       }
     };
 
     const loadUsers = async () => {
       try {
-        const res = await userApi.getAll({ limit: 1000 }); // Load all users
+        const res = await userApi.getAllUsersList({ limit: 1000 }); // Load all users
         const list = res?.data || res || [];
         setUsers(Array.isArray(list) ? list : []);
       } catch (error) {
+        console.log("🚀 ~ loadUsers ~ error:", error)
         toast.error(error?.message || "Failed to load users");
       }
     };
@@ -344,7 +346,6 @@ const AccountsPage = () => {
     if (name === "product_id") {
       const selectedProduct = products.find((p) => p.id === Number(value));
       if (selectedProduct) {
-        console.log("Selected product:", selectedProduct);
         setFormData((prev) => {
           const installmentPrice = selectedProduct.installment_price || "";
           const advance = selectedProduct.advance || "";
@@ -416,9 +417,7 @@ const AccountsPage = () => {
   };
 
   const handleSmartImageUpload = (file) => {
-    console.log("handleSmartImageUpload called with:", file);
-    console.log("selectedImageType:", selectedImageType);
-
+  
     if (selectedImageType && file) {
       console.log("Processing upload for:", selectedImageType);
 

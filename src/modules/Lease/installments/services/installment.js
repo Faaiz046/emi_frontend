@@ -9,6 +9,11 @@ export const installmentApi = {
     return response.data;
   },
 
+  getInstallmentsDetails: async (id) => {
+    const response = await apiClient.get(`${BASE_URL}/detail/${id}`);
+    return response.data;
+  },
+
   // Get installment by ID
   getById: async (id) => {
     const response = await apiClient.get(`${BASE_URL}/${id}`);

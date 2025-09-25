@@ -9,7 +9,7 @@ export const fetchUsers = createAsyncThunk(
     try {
       // Try API first, fallback to mock
       try {
-        const response = await userApi.getAll(params)
+        const response = await userApi.getAllUsersList(params)
         if (response.status) {
           return response.data
         }

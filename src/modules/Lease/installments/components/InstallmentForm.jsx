@@ -12,19 +12,23 @@ import Toast from "../../../../utils/toast";
 import { RiLoader3Fill } from "react-icons/ri";
 import { apiClient } from "../../../../services/api-client/api";
 import { useQuery } from "@tanstack/react-query";
+import { DataTable } from "../../../../shared/components/ui/DataTable";
+import { getFormattedDate } from "../../../../utils/common";
+
 const InstallmentForm = ({
   isOpen,
   onClose,
   installment = null,
-  accountId,
+  accountId ,
   onSuccess,
   preBalance = 0,
+  account_number ,
 }) => {
   const [formData, setFormData] = useState({
     recv_no: "",
     install_date: new Date().toISOString().split("T")[0],
     model: "",
-    account_id: accountId || "",
+    account_id: accountId || "" ,
     account_date: "",
     advance: "",
     customer_name: "",
@@ -45,13 +49,77 @@ const InstallmentForm = ({
     payment_method: "cash", // cash, bank, check, online
     bank_account_id: "",
     notes: "",
+    installments: [],
   });
 
+
+
+  const columns = [
+    { key: "recv_no", label: "Receipt No" },
+    { 
+      key: "install_date", 
+      label: "Install Date",
+      render: (value) => getFormattedDate(value)
+    },
+    { 
+      key: "install_charge", 
+      label: "Install Charge",
+      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
+    },
+    { 
+      key: "fine", 
+      label: "Fine",
+      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
+    },
+    { key: "fine_type", label: "Fine Type" },
+    { 
+      key: "discount", 
+      label: "Discount",
+      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
+    },
+    { 
+      key: "balance", 
+      label: "Balance",
+      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
+    },
+    { 
+      key: "outstanding", 
+      label: "Outstanding",
+      render: (value) => value ? `$${parseFloat(value).toLocaleString()}` : "N/A"
+    },
+    { 
+      key: "sms_sent", 
+      label: "SMS Sent",
+      render: (value) => value ? "Yes" : "No"
+    },
+    { 
+      key: "officer", 
+      label: "Officer",
+      render: (value) => value?.name || "N/A"
+    },
+    { key: "payment_method", label: "Payment Method" },
+    { 
+      key: "bankAccount", 
+      label: "Bank Account",
+      render: (value) => value?.account_title || "N/A"
+    },
+    { key: "notes", label: "Notes" },
+  ];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [accountDetails, setAccountDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    if (account_number) {
+      setFormData({
+        ...formData,
+        acc_no: account_number || "",
+      });
+      fetchAccountDetails();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account_number]);
   useEffect(() => {
     if (installment) {
       setFormData({
@@ -60,7 +128,7 @@ const InstallmentForm = ({
           ? new Date(installment.install_date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
         model: installment.model || "",
-        account_id: "",
+        account_id: "" ,
         acc_no: installment.acc_no || "",
         account_date: installment.account_date
           ? new Date(installment.account_date).toISOString().split("T")[0]
@@ -85,6 +153,7 @@ const InstallmentForm = ({
         payment_method: installment.payment_method || "cash",
         bank_account_id: installment.bank_account_id?.toString() || "",
         notes: installment.notes || "",
+        installments: installment.installments || [],
       });
     } else {
       setFormData({
@@ -114,6 +183,7 @@ const InstallmentForm = ({
         bank_account_id: "",
         notes: "",
         officer_id: "",
+        installments: [],
       });
     }
   }, [installment, accountId, preBalance]);
@@ -157,14 +227,15 @@ const InstallmentForm = ({
   };
 
   const fetchAccountDetails = async () => {
-    if (!formData.acc_no) return;
+    // if (!formData.acc_no || !account_number) return;
 
     try {
       setLoading(true);
       setError(null);
       const res = await leaseAccountApi.accountDetails({
-        acc_no: formData.acc_no,
+        acc_no: formData.acc_no || account_number,
       });
+      console.log("🚀 ~ fetchAccountDetails ~ res:", res);
       const accountData = res?.data || res;
 
       if (accountData) {
@@ -172,25 +243,30 @@ const InstallmentForm = ({
         // Update form fields with account details
         setFormData((prev) => ({
           ...prev,
-          account_id: accountData.leaseAdvance?.id || "",
-          customer_name: accountData.customer_name || "",
-          son_of: accountData.son_of || "",
-          account_date: accountData.process_date
-            ? new Date(accountData.process_date).toISOString().split("T")[0]
+
+          acc_no: accountData?.process?.acc_no || "",
+          account_id: accountData.id || "" ,
+          customer_name: accountData?.process?.customer_name || "",
+          son_of: accountData?.process?.son_of || "",
+          account_date: accountData?.process?.process_date
+            ? new Date(accountData?.process?.process_date)
+                .toISOString()
+                .split("T")[0]
             : "",
-          advance: accountData.advance?.toString() || "",
+          advance: accountData?.process?.advance?.toString() || "",
           monthly_installment:
-            accountData.monthly_installment?.toString() || "",
+            accountData?.process?.monthly_installment?.toString() || "",
           pre_balance: parseFloat(
-            accountData.leaseAdvance?.remaining_balance || 0
+            accountData?.remaining_balance || 0
           ).toString(),
-          account_type: accountData.process_type || "",
-          model: accountData.product?.name || "",
-          install_charge: accountData?.monthly_installment || 0,
+          account_type: accountData?.process?.process_type || "",
+          model: accountData?.process?.product?.name || "",
+          install_charge: accountData?.process?.monthly_installment || 0,
           recovery_officer:
             accountData?.outStandPayment?.recovery_officer_id || "",
           outstand: accountData?.outStandPayment?.outstand || 0,
           officer_id: accountData?.outStandPayment?.recovery_officer_id || "",
+          installments: accountData?.installments || [],
         }));
         toast.success(`Account #${accountData.acc_no} loaded successfully`);
       }
@@ -248,7 +324,7 @@ const InstallmentForm = ({
         account_id: parseInt(formData.account_id),
         advance: parseFloat(formData.advance) || 0,
         pre_balance: parseFloat(formData.pre_balance),
-        pending: parseFloat(formData.pending) || 0,
+        pending: parseFloat(formData.pending_advance) || 0,
         install_charge: parseFloat(formData.install_charge),
         monthly_installment: parseFloat(formData.monthly_installment) || 0,
         fine: parseFloat(formData.fine),
@@ -552,7 +628,7 @@ const InstallmentForm = ({
                     value={formData.account_type}
                     onChange={(value) =>
                       handleInputChange({
-                        target: { name: "payment_method", value },
+                        target: { name: "account_type", value },
                       })
                     }
                     options={banks_drd.map((bank) => ({
@@ -610,6 +686,20 @@ const InstallmentForm = ({
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="bg-gray-50 p-2 rounded border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                Installments
+              </h3>
+              <DataTable
+                data={formData?.installments}
+                columns={columns}
+                loading={loading}
+                pagination={false}
+                // onPageChange={(page) =>
+                //   setPagination((prev) => ({ ...prev, page }))
+                // }
+              />
             </div>
           </>
         ) : loading ? (

@@ -19,7 +19,7 @@ const InstallmentsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
-  console.log("🚀 ~ InstallmentsPage ~ data:", data);
+  const [installmentDetails, setInstallmentDetails] = useState([]);
   const currentDate = new Date();
 
   // Helper function to format date as YYYY-MM-DD
@@ -112,6 +112,28 @@ const InstallmentsPage = () => {
       toast.error(error?.message || "Failed to fetch installments");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getInstallmentsDetails = async (id) => {
+    try {
+      const res = await installmentApi.getInstallmentsDetails(id);
+      const accountData = res?.data || res;
+      setInstallmentDetails([
+        {
+          install_date: accountData.install_date,
+          recv_no: accountData.recv_no,
+          pre_balance: accountData.pre_balance,
+          install_charge: accountData.install_charge,
+          balance: accountData.balance,
+          payment_method: accountData.payment_method,
+          fine: accountData.fine,
+          fine_type: accountData.fine_type,
+          discount: accountData.discount,
+        },
+      ]);
+    } catch (error) {
+      toast.error(error?.message || "Failed to fetch installments details");
     }
   };
 
@@ -231,7 +253,10 @@ const InstallmentsPage = () => {
                         ? "bg-blue-50 border-r-2 border-blue-500"
                         : ""
                     }`}
-                    onClick={() => setSelectedInstallment(installment)}
+                    onClick={() => {
+                      setSelectedInstallment(installment);
+                      getInstallmentsDetails(installment.id);
+                    }}
                   >
                     <div className="font-medium text-gray-900">
                       #{installment.id}
@@ -417,15 +442,17 @@ const InstallmentsPage = () => {
             </Card>
           )}
         </div>
-       <div className="mt-3">
-       <DataTable
-          data={data}
-          columns={columns2}
-          loading={loading}
-          pagination={false}
-          onRowClick={(installment) => setSelectedInstallment(installment)}
-        />
-       </div>
+        {installmentDetails.length > 0 ? (
+          <div className="mt-3">
+            <DataTable
+              data={installmentDetails}
+              columns={columns2}
+              loading={loading}
+              pagination={false}
+              onRowClick={(installment) => setSelectedInstallment(installment)}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

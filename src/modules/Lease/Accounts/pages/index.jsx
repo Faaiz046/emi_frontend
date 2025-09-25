@@ -10,10 +10,17 @@ import { Card } from "../../../../shared/components/ui/Card";
 import SelectInput from "../../../../shared/components/ui/SelectInput";
 import DateSelect from "../../../../shared/components/ui/DateSelect";
 import { RiLoader3Fill } from "react-icons/ri";
+import InstallmentForm from "../../installments/components/InstallmentForm";
 const AccountsListPage = () => {
+  
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [installmentForm, setInstallmentForm] = useState({
+    isOpen: false,
+    accountId: null,
+    account_number: null,
+  });
   const [data, setData] = useState([]);
   const [filtersDate, setFiltersDate] = useState({
     start_date: "",
@@ -293,11 +300,16 @@ const AccountsListPage = () => {
                     <div className="flex gap-2">
                       <Button
                         onClick={() =>
-                          navigate(
-                            `/lease/accounts/${
-                              selectedAccount.id || selectedAccount.acc_no
-                            }/installments`
-                          )
+                          // navigate(
+                          //   `/lease/accounts/${
+                          //     selectedAccount.id || selectedAccount.acc_no
+                          //   }/installments`
+                          // )
+                          setInstallmentForm({
+                            isOpen: true,
+                            
+                            account_number:  selectedAccount.acc_no,
+                          })
                         }
                         className="bg-gradient-to-r from-green-500 to-emerald-600 !text-white hover:from-emerald-600 hover:to-green-500 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 font-semibold px-3 py-2 rounded-lg text-sm"
                       >
@@ -776,6 +788,12 @@ const AccountsListPage = () => {
 
       {/* Render the appropriate view */}
       {viewMode === "table" ? renderTableView() : renderGridView()}
+      <InstallmentForm
+        isOpen={installmentForm.isOpen}
+        onClose={() => setInstallmentForm({ isOpen: false, accountId: null, account_number: null })}
+        accountId={installmentForm.accountId}
+        account_number={installmentForm.account_number}
+      />
     </div>
   );
 };
