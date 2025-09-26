@@ -11,6 +11,7 @@ import {
   getFormattedDate,
   formatCurrency,
   getDate,
+  formatDateForStorage,
 } from "../../../../utils/common";
 import { RiLoader3Fill } from "react-icons/ri";
 import DateSelect from "../../../../shared/components/ui/DateSelect";
@@ -23,12 +24,6 @@ const InstallmentsPage = () => {
   const currentDate = new Date();
 
   // Helper function to format date as YYYY-MM-DD
-  const formatDateForStorage = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   const initialFilters = {
     // start_date:
@@ -119,19 +114,7 @@ const InstallmentsPage = () => {
     try {
       const res = await installmentApi.getInstallmentsDetails(id);
       const accountData = res?.data || res;
-      setInstallmentDetails([
-        {
-          install_date: accountData.install_date,
-          recv_no: accountData.recv_no,
-          pre_balance: accountData.pre_balance,
-          install_charge: accountData.install_charge,
-          balance: accountData.balance,
-          payment_method: accountData.payment_method,
-          fine: accountData.fine,
-          fine_type: accountData.fine_type,
-          discount: accountData.discount,
-        },
-      ]);
+      setInstallmentDetails(accountData?.installments || []);
     } catch (error) {
       toast.error(error?.message || "Failed to fetch installments details");
     }
@@ -199,7 +182,7 @@ const InstallmentsPage = () => {
 
   const DetailItem = ({ label, value, className }) => (
     <div className={`p-4 space-x-3 bg-white   flex-1 ${className}`}>
-      <span className="text-sm font-bold text-gray-900 tracking-wide uppercase">
+      <span className="text-sm font-bold text-gray-900 tracking-wide uppercas">
         {label}
       </span>
       <span className="text-sm font-medium text-gray-700 mt-1">

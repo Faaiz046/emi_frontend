@@ -18,6 +18,7 @@ const modalVariants = cva(
         default: "p-6",
         lg: "p-8",
         xl: "p-10",
+        xxl: "p-10",
         full: "p-0",
       },
     },
@@ -37,6 +38,7 @@ const modalContentVariants = cva(
         default: "max-w-md w-full",
         lg: "max-w-lg w-full",
         xl: "max-w-4xl w-full",
+        xxl: "max-w-[70%] w-full",
         full: "w-full h-full rounded-none",
       },
       animation: {

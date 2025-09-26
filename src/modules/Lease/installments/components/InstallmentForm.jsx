@@ -13,22 +13,27 @@ import { RiLoader3Fill } from "react-icons/ri";
 import { apiClient } from "../../../../services/api-client/api";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "../../../../shared/components/ui/DataTable";
-import { getFormattedDate } from "../../../../utils/common";
+import {
+  formatCurrency,
+  formatDateForStorage,
+  getFormattedDate,
+} from "../../../../utils/common";
 
 const InstallmentForm = ({
   isOpen,
   onClose,
   installment = null,
-  accountId ,
+  accountId,
   onSuccess,
   preBalance = 0,
-  account_number ,
+  account_number,
 }) => {
+  const currentDate = new Date();
   const [formData, setFormData] = useState({
     recv_no: "",
-    install_date: new Date().toISOString().split("T")[0],
+    install_date: formatDateForStorage(currentDate),
     model: "",
-    account_id: accountId || "" ,
+    account_id: accountId || "",
     account_date: "",
     advance: "",
     customer_name: "",
@@ -52,58 +57,35 @@ const InstallmentForm = ({
     installments: [],
   });
 
-
-
   const columns = [
-    { key: "recv_no", label: "Receipt No" },
-    { 
-      key: "install_date", 
+    {
+      key: "install_date",
       label: "Install Date",
-      render: (value) => getFormattedDate(value)
+      render: (v) => getFormattedDate(v, "DD-MMM-YYYY"),
     },
-    { 
-      key: "install_charge", 
+    {
+      key: "recv_no",
+      label: "Recv No",
+      render: (v) => v,
+    },
+    {
+      key: "pre_balance",
+      label: "Pre Balance",
+      render: (v) => formatCurrency(v),
+    },
+    {
+      key: "install_charge",
       label: "Install Charge",
-      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
+      render: (v) => formatCurrency(v),
     },
-    { 
-      key: "fine", 
-      label: "Fine",
-      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
+    { key: "balance", label: "Balance", render: (v) => formatCurrency(v) },
+    {
+      key: "officer",
+      label: "Recovery",
+      render: (v) => v?.name,
     },
+    { key: "fine", label: "Fine", render: (v) => formatCurrency(v) },
     { key: "fine_type", label: "Fine Type" },
-    { 
-      key: "discount", 
-      label: "Discount",
-      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
-    },
-    { 
-      key: "balance", 
-      label: "Balance",
-      render: (value) => `$${parseFloat(value || 0).toLocaleString()}`
-    },
-    { 
-      key: "outstanding", 
-      label: "Outstanding",
-      render: (value) => value ? `$${parseFloat(value).toLocaleString()}` : "N/A"
-    },
-    { 
-      key: "sms_sent", 
-      label: "SMS Sent",
-      render: (value) => value ? "Yes" : "No"
-    },
-    { 
-      key: "officer", 
-      label: "Officer",
-      render: (value) => value?.name || "N/A"
-    },
-    { key: "payment_method", label: "Payment Method" },
-    { 
-      key: "bankAccount", 
-      label: "Bank Account",
-      render: (value) => value?.account_title || "N/A"
-    },
-    { key: "notes", label: "Notes" },
   ];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -128,7 +110,7 @@ const InstallmentForm = ({
           ? new Date(installment.install_date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
         model: installment.model || "",
-        account_id: "" ,
+        account_id: "",
         acc_no: installment.acc_no || "",
         account_date: installment.account_date
           ? new Date(installment.account_date).toISOString().split("T")[0]
@@ -245,7 +227,7 @@ const InstallmentForm = ({
           ...prev,
 
           acc_no: accountData?.process?.acc_no || "",
-          account_id: accountData.id || "" ,
+          account_id: accountData.id || "",
           customer_name: accountData?.process?.customer_name || "",
           son_of: accountData?.process?.son_of || "",
           account_date: accountData?.process?.process_date
@@ -412,7 +394,7 @@ const InstallmentForm = ({
       isOpen={isOpen}
       onClose={handleClose}
       title={installment ? "Edit Installment" : "Add New Installment"}
-      size="xl"
+      size="xxl"
       onSubmit={handleSubmit}
       loading={isLoading}
     >
