@@ -20,7 +20,7 @@ import { leaseAccountApi } from "../../services";
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const InstallmentDetail = () => {
+const AccountDetai = () => {
     const [account, setAccount] = useState(null);
     const [loading, setLoading] = useState(false);
     const { account_id } = useParams();
@@ -363,4 +363,4 @@ const InstallmentDetail = () => {
   )
 }
 
-export default InstallmentDetail
+export default AccountDetai
