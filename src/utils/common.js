@@ -19,7 +19,7 @@ import dayjs from "dayjs";
 // };
 export const getFormattedDate = (date, format) => {
   if (!date) return "";
-  return dayjs(date).format(format ? format : "DD-MMM-YYYY h:mm A");
+  return dayjs(date).format(format ? format : "DD-MMM-YYYY");
 };
 export const formatDateForStorage = (date) => {
   const year = date.getFullYear();
